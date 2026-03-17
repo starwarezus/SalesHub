@@ -95,22 +95,22 @@ app.get('/api/orders/day', async (req, res) => {
   try {
     const token = await getToken();
 
-    // Build date range: full day
+    // Build date range: full day — format required by SC: yyyy/MM/dd
     const [y, m, d] = date.split('-');
-    const from = `${m}/${d}/${y} 00:00`;
-    const to   = `${m}/${d}/${y} 23:59`;
+    const from = `${y}/${m}/${d}`;
+    const to   = `${y}/${m}/${d}`;
 
     let pageNum = 1;
-    const pageSize = 100;
+    const pageSize = 50;
     let allItems = [];
     let totalResults = null;
 
     while (true) {
-      const url = new URL(`https://${SC_SERVER}/rest/api/Orders/GetAllByView`);
-      url.searchParams.set('model.pageSize', pageSize);
-      url.searchParams.set('model.pageNumber', pageNum);
-      url.searchParams.set('model.DateCreatedFrom', from);
-      url.searchParams.set('model.DateCreatedTo', to);
+      const url = new URL(`https://${SC_SERVER}/rest/api/Orders`);
+      url.searchParams.set('pageSize', pageSize);
+      url.searchParams.set('pageNumber', pageNum);
+      url.searchParams.set('model.createdOnFrom', from);
+      url.searchParams.set('model.createdOnTo', to);
 
       const scRes = await fetch(url.toString(), {
         headers: {
