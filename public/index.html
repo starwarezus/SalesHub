@@ -187,7 +187,6 @@ tr.group-subtotal:hover td{background:rgba(79,142,247,0.07)}
     <select id="company-filter"><option value="">all companies</option></select>
     <select id="status-filter"><option value="">all statuses</option></select>
     <button class="btn" id="inumber-toggle">i# only</button>
-    <button class="btn" id="unpicked-toggle">unpicked only</button>
     <div class="vsep"></div>
     <button class="btn btn-primary" id="load-btn">load orders</button>
     <div class="vsep"></div>
@@ -228,6 +227,7 @@ tr.group-subtotal:hover td{background:rgba(79,142,247,0.07)}
       </div>
     </div>
   </div>
+
 
   <button id="jump-top" title="Back to top">↑</button>
 </div>
@@ -376,12 +376,10 @@ function applyFilters(){
   const co=activeCompanyFilter||document.getElementById('company-filter').value;
   const st=document.getElementById('status-filter').value;
   const iOnly=document.getElementById('inumber-toggle').classList.contains('active');
-  const uOnly=document.getElementById('unpicked-toggle').classList.contains('active');
   filtered=allOrders.filter(o=>{
     if(co&&companyName(o)!==co)return false;
     if(st&&statusInfo(o).label!==st)return false;
     if(iOnly&&!orderHasINum(o))return false;
-    if(uOnly&&!orderHasUnpicked(o))return false;
     if(q){
       const hay=[(o.OrderSourceOrderID||''),(o.FirstName||'')+' '+(o.LastName||''),companyName(o),String(o.GrandTotal||''),statusInfo(o).label].join(' ').toLowerCase();
       if(!hay.includes(q))return false;
@@ -390,7 +388,7 @@ function applyFilters(){
   });
   doSort();
   if(activeTab==='orders'){renderTable();renderSummary()}
-  else{renderUnpicked();renderSummary()}
+  else if(activeTab==='unpicked'){renderUnpicked();renderSummary()}
 }
 
 function doSort(){
@@ -494,8 +492,9 @@ function renderTable(){
       const name=itemName(it);
       const unpicked=itemIsUnpicked(it);
       const imgUrl=it.ImageURL||'';
-      const imgEl=imgUrl
-        ?`<img class="item-thumb" src="${imgUrl}" alt="${name}" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" data-name="${name}" data-url="${imgUrl}"/><span class="item-thumb-placeholder" style="display:none">?</span>`
+      const proxyUrl=imgUrl?`/api/image?url=${encodeURIComponent(imgUrl)}`:''
+      const imgEl=proxyUrl
+        ?`<img class="item-thumb" src="${proxyUrl}" alt="${name}" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" data-name="${name}" data-url="${proxyUrl}"/><span class="item-thumb-placeholder" style="display:none">?</span>`
         :`<span class="item-thumb-placeholder">?</span>`;
       return`<div class="item-row">${imgEl}<span class="item-name">${name}</span><span class="item-qty">×${it.Qty||1}</span>${unpicked?`<span class="item-unpicked" title="Unpicked: ${(it.Qty||0)-(it.QtyPicked||0)} remaining"></span>`:''}</div>`;
     }).join('');
@@ -574,8 +573,9 @@ function renderUnpicked(){
     const scUrl=`${SC_BASE}/Orders/Detail.aspx?id=${o.ID}`;
     const name=itemName(it);
     const imgUrl=it.ImageURL||'';
-    const imgEl=imgUrl
-      ?`<img class="item-thumb" src="${imgUrl}" alt="${name}" loading="lazy" onerror="this.style.display='none'" data-name="${name}" data-url="${imgUrl}" style="width:28px;height:28px"/>`
+    const pUrl=imgUrl?`/api/image?url=${encodeURIComponent(imgUrl)}`:''
+    const imgEl=pUrl
+      ?`<img class="item-thumb" src="${pUrl}" alt="${name}" loading="lazy" onerror="this.style.display='none'" data-name="${name}" data-url="${pUrl}" style="width:28px;height:28px"/>`
       :`<span class="item-thumb-placeholder" style="width:28px;height:28px;font-size:9px">?</span>`;
     const remaining=(it.Qty||0)-(it.QtyPicked||0);
     return`<tr>
@@ -610,6 +610,31 @@ document.getElementById('lightbox').addEventListener('click',e=>{
 });
 document.addEventListener('keydown',e=>{if(e.key==='Escape')document.getElementById('lightbox').classList.remove('open')});
 
+  body.innerHTML=rows.map(({o,it})=>{
+    const si=statusInfo(o);
+    const scUrl=`${SC_BASE}/Orders/Detail.aspx?id=${o.ID}`;
+    const name=itemName(it);
+    const imgUrl=it.ImageURL||'';
+    const pUrl=imgUrl?`/api/image?url=${encodeURIComponent(imgUrl)}`:'';
+    const imgEl=pUrl
+      ?`<img class="item-thumb" src="${pUrl}" alt="${name}" loading="lazy" onerror="this.style.display='none'" data-name="${name}" data-url="${pUrl}" style="width:28px;height:28px"/>`
+      :`<span class="item-thumb-placeholder" style="width:28px;height:28px;font-size:9px">?</span>`;
+    const remaining=Math.max(0,(it.Qty||0)-(it.QtyPicked||0));
+    const unpicked=itemIsUnpicked(it);
+    return`<tr>
+      <td style="font-family:var(--mono);font-size:11px;color:var(--text2)">${companyName(o)}</td>
+      <td><a class="order-link" href="${scUrl}" target="_blank">${o.OrderSourceOrderID||('#'+o.ID)||'—'}</a></td>
+      <td><span class="status-badge ${si.cls}">${si.label}</span></td>
+      <td><div style="display:flex;align-items:center;gap:8px">${imgEl}<span style="font-size:11px">${name}</span>${unpicked?`<span class="item-unpicked" title="Unpicked"></span>`:''}</div></td>
+      <td style="font-family:var(--mono);text-align:center">${it.Qty||0}</td>
+      <td style="font-family:var(--mono);text-align:center">${it.QtyPicked||0}</td>
+      <td style="font-family:var(--mono);text-align:center;${unpicked?'color:var(--amber);font-weight:500':''}">${remaining||'—'}</td>
+      <td style="font-family:var(--mono);font-size:11px;color:var(--text2)">${it.ShipFromWarehouseName||'—'}</td>
+    </tr>`;
+  }).join('');
+  attachLightbox();
+}
+
 // ── Tabs ──────────────────────────────────────────────────────────────────────
 document.querySelectorAll('.tab').forEach(tab=>{
   tab.addEventListener('click',()=>{
@@ -618,10 +643,10 @@ document.querySelectorAll('.tab').forEach(tab=>{
     if(activeTab==='orders'){
       show('tab-orders');hide('tab-unpicked');
       renderTable();
-    } else {
+    } else if(activeTab==='unpicked'){
       hide('tab-orders');show('tab-unpicked');
       renderUnpicked();
-    }
+
   });
 });
 
@@ -647,7 +672,7 @@ document.getElementById('search-inp').addEventListener('input',()=>{if(allOrders
 document.getElementById('company-filter').addEventListener('change',()=>{activeCompanyFilter='';if(allOrders.length)applyFilters()});
 document.getElementById('status-filter').addEventListener('change',()=>{if(allOrders.length)applyFilters()});
 document.getElementById('inumber-toggle').addEventListener('click',()=>{document.getElementById('inumber-toggle').classList.toggle('active');if(allOrders.length)applyFilters()});
-document.getElementById('unpicked-toggle').addEventListener('click',()=>{document.getElementById('unpicked-toggle').classList.toggle('active');if(allOrders.length)applyFilters()});
+
 
 window.addEventListener('scroll',()=>{
   const btn=document.getElementById('jump-top');
