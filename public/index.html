@@ -335,9 +335,9 @@ async function loadOrders(){
 function buildFilters(){
   const companies=[...new Set(allOrders.map(companyName))].filter(s=>s&&s!=='—').sort();
   const ss=document.getElementById('company-filter');const sv=ss.value;
-  ss.innerHTML='<option value="">all sources</option>';
-  sources.forEach(s=>{const o=document.createElement('option');o.value=s;o.textContent=s;ss.appendChild(o)});
-  if(sources.includes(sv))ss.value=sv;
+  ss.innerHTML='<option value="">all companies</option>';
+  companies.forEach(s=>{const o=document.createElement('option');o.value=s;o.textContent=s;ss.appendChild(o)});
+  if(companies.includes(sv))ss.value=sv;
 
   const statuses=[...new Set(allOrders.map(o=>statusInfo(o).label))].sort();
   const sf=document.getElementById('status-filter');const sfv=sf.value;
