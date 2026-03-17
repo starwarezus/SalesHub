@@ -127,6 +127,8 @@
   tr.group-cont td:first-child  { border-left: 2px solid rgba(79,142,247,0.18); }
   tr.group-cont:hover td        { background: var(--bg2); }
   tr.group-start-border td      { border-top: 1px solid var(--border2); }
+  tr.group-subtotal td           { background: rgba(79,142,247,0.04); padding-top:5px; padding-bottom:5px; }
+  tr.group-subtotal:hover td     { background: rgba(79,142,247,0.07); }
 
   /* Source badges */
   .badge {
@@ -290,6 +292,13 @@ function statusInfo(o){
   return STATUS_MAP[sc] || {label:'code:'+sc, cls:'s-other'};
 }
 function companyName(o){return (o.CompanyName||'').trim()||'—'}
+function isCancelled(o){const sc=o.StatusCode;return sc===-1||sc===7||statusInfo(o).label==='Cancelled'}
+function effectiveTotal(o){
+  if(isCancelled(o)) return 0;
+  if(o.GrandTotal) return o.GrandTotal;
+  // GrandTotal=0 on split parent — sum from line items instead
+  return (o.Items||[]).reduce((s,it)=>s+(it.LineTotal||it.SitePrice||0),0);
+}
 function isINum(sku){return sku&&/^i\d+$/i.test(sku.trim())}
 function orderHasINum(o){return (o.Items||[]).some(it=>isINum(it.ProductID)||isINum(it.InventoryKey))}
 
@@ -402,9 +411,9 @@ function doSort(){
 }
 
 function renderSummary(){
-  const rev=filtered.reduce((s,o)=>s+(o.GrandTotal||0),0);
+  const rev=filtered.reduce((s,o)=>s+effectiveTotal(o),0);
   const bySrc={};
-  filtered.forEach(o=>{const s=companyName(o);if(!bySrc[s])bySrc[s]={n:0,r:0};bySrc[s].n++;bySrc[s].r+=o.GrandTotal||0});
+  filtered.forEach(o=>{const s=companyName(o);if(!bySrc[s])bySrc[s]={n:0,r:0};bySrc[s].n++;bySrc[s].r+=effectiveTotal(o);});
   const el=document.getElementById('summary');
   let h=`
     <div class="metric highlight fade-in">
@@ -450,22 +459,38 @@ function renderTable(){
     renderPagination();return;
   }
 
+  // Pre-compute group totals for subtotal rows
+  const groupTotals={};
+  pageData.forEach(o=>{
+    const key=o.OrderSourceOrderID||String(o.ID);
+    if(!groupTotals[key])groupTotals[key]={total:0,count:0};
+    groupTotals[key].total+=effectiveTotal(o);
+    groupTotals[key].count++;
+  });
+
   body.innerHTML=pageData.map((o,i)=>{
     const prev=i>0?pageData[i-1]:null;
+    const next=i<pageData.length-1?pageData[i+1]:null;
     const sameId=prev&&prev.OrderSourceOrderID&&o.OrderSourceOrderID&&prev.OrderSourceOrderID===o.OrderSourceOrderID;
     const isGroupCont=!!sameId;
-    // Add top border when a new group starts (and it's not the very first row)
     const isNewGroup=!sameId&&i>0;
+    // Is this the last row of a multi-row group?
+    const key=o.OrderSourceOrderID||String(o.ID);
+    const isLastInGroup=groupTotals[key].count>1&&(!next||next.OrderSourceOrderID!==o.OrderSourceOrderID);
 
     const sn=companyName(o);
     const si=statusInfo(o);
     const dt=o.TimeOfOrder?new Date(o.TimeOfOrder).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}):'—';
-    const amt=o.GrandTotal!=null?'$'+Number(o.GrandTotal).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}):'—';
+    const cancelled=isCancelled(o);
+    const displayTotal=effectiveTotal(o);
+    const amt=cancelled
+      ?'<span style="color:var(--text3);text-decoration:line-through">$'+Number(o.GrandTotal||0).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})+'</span>'
+      :'$'+Number(displayTotal).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
     const skus=(o.Items||[]).map(it=>`<span class="sku-pill">${it.ProductID||it.InventoryKey||'—'} ×${it.Qty||1}</span>`).join('');
     const scUrl=`${SC_BASE}/Orders/Detail.aspx?id=${o.ID}`;
     const rowCls=[isGroupCont?'group-cont':'group-first',isNewGroup?'group-start-border':''].filter(Boolean).join(' ');
 
-    return `<tr class="${rowCls}">`+vcols.map(c=>{
+    const mainRow=`<tr class="${rowCls}">`+vcols.map(c=>{
       if(c.k==='source')      return `<td style="font-family:var(--mono);font-size:11px;color:var(--text2)">${companyName(o)}</td>`;
       if(c.k==='srcOrderId')  return isGroupCont
         ?`<td><span class="order-id-cont">↳ ${o.OrderSourceOrderID||('#'+o.ID)||'—'}</span></td>`
@@ -476,6 +501,19 @@ function renderTable(){
       if(c.k==='items')       return `<td><div class="sku-list">${skus||'<span style="color:var(--text3);font-size:10px">—</span>'}</div></td>`;
       return '<td>—</td>';
     }).join('')+'</tr>';
+
+    // Group subtotal row after last row of a multi-order group
+    let subtotalRow='';
+    if(isLastInGroup){
+      const gt=groupTotals[key].total;
+      const gtFmt='$'+gt.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+      subtotalRow=`<tr class="group-subtotal">`+vcols.map(c=>{
+        if(c.k==='GrandTotal') return `<td style="font-family:var(--mono);font-weight:500;color:var(--text);border-top:1px solid var(--border2)">${gtFmt}</td>`;
+        if(c.k==='srcOrderId') return `<td style="font-family:var(--mono);font-size:10px;color:var(--text3);border-top:1px solid var(--border2)">group total</td>`;
+        return `<td style="border-top:1px solid var(--border2)"></td>`;
+      }).join('')+'</tr>';
+    }
+    return mainRow+subtotalRow;
   }).join('');
 
   renderPagination();
