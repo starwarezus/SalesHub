@@ -109,8 +109,8 @@ app.get('/api/orders/day', async (req, res) => {
       const url = new URL(`https://${SC_SERVER}/rest/api/Orders`);
       url.searchParams.set('pageSize', pageSize);
       url.searchParams.set('pageNumber', pageNum);
-      url.searchParams.set('model.createdOnFrom', from);
-      url.searchParams.set('model.createdOnTo', to);
+      url.searchParams.set('model.OrderFromDate', from);
+      url.searchParams.set('model.OrderToDate', to);
 
       const scRes = await fetch(url.toString(), {
         headers: {
