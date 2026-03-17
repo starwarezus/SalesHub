@@ -137,9 +137,9 @@ app.get('/api/orders/day', async (req, res) => {
       pageNum++;
     }
 
-    // Debug: log actual StatusCode + ShippingStatus combos from real orders
-    const uniqueStatuses = [...new Set(allItems.map(o => `SC:${o.StatusCode} SS:${o.ShippingStatus}`))]
-    console.log(`[${date}] Statuses seen: ${uniqueStatuses.join(', ')}`);
+    // Debug: log sample image URLs to diagnose auth issues
+    const sampleImgs = allItems.flatMap(o => (o.Items||[]).map(it => it.ImageURL)).filter(Boolean).slice(0,3);
+    if(sampleImgs.length) console.log(`[IMG SAMPLES] ${sampleImgs.join(' | ')}`);
 
     res.json({ date, count: allItems.length, total: totalResults, orders: allItems });
 
@@ -149,7 +149,26 @@ app.get('/api/orders/day', async (req, res) => {
   }
 });
 
-// ─── Serve frontend ───────────────────────────────────────────────────────────
+// Image proxy — fetches SC images server-side with auth token
+app.get('/api/image', async (req, res) => {
+  const { url } = req.query;
+  if (!url) return res.status(400).send('missing url');
+  try {
+    const token = await getToken();
+    const imgRes = await fetch(decodeURIComponent(url), {
+      headers: { 'Authorization': 'Bearer ' + token }
+    });
+    if (!imgRes.ok) return res.status(imgRes.status).send('image fetch failed');
+    const ct = imgRes.headers.get('content-type') || 'image/jpeg';
+    res.setHeader('Content-Type', ct);
+    res.setHeader('Cache-Control', 'public, max-age=86400');
+    imgRes.body.pipe(res);
+  } catch(e) {
+    res.status(500).send('proxy error: ' + e.message);
+  }
+});
+
+// Serve frontend───────────────
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
