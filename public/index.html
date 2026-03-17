@@ -62,6 +62,7 @@
   .btn-primary { background: var(--accent); border-color: var(--accent); color: #fff; }
   .btn-primary:hover { background: #3d7de8; border-color: #3d7de8; }
   .btn-sm { padding: 4px 10px; font-size: 10px; }
+  .btn.active { background: var(--accent); border-color: var(--accent); color: #fff; }
 
   .col-toggles { display: flex; gap: 5px; flex-wrap: wrap; }
   .ctog {
@@ -206,8 +207,9 @@
     <div class="vsep"></div>
     <input type="text" id="search-inp" placeholder="search orders..." style="width:180px"/>
     <div class="vsep"></div>
-    <select id="src-filter"><option value="">all sources</option></select>
+    <select id="company-filter"><option value="">all companies</option></select>
     <select id="status-filter"><option value="">all statuses</option></select>
+    <button class="btn" id="inumber-toggle">i# only</button>
     <div class="vsep"></div>
     <button class="btn btn-primary" id="load-btn">load orders</button>
     <div class="vsep"></div>
@@ -232,8 +234,6 @@
 
 <script>
 const SC_BASE   = 'https://blny.sellercloud.com';
-const SRC_MAP   = {0:'Other',1:'Amazon',2:'eBay',3:'Walmart',4:'Etsy',5:'Jet',6:'Overstock',7:'Newegg',8:'Sears',9:'Best Buy',10:'Rakuten',11:'Houzz',12:'Wayfair',13:'Target',14:'Wish'};
-const BADGE_CLS = {Amazon:'b-amazon',eBay:'b-ebay',Walmart:'b-walmart',Etsy:'b-etsy',Jet:'b-jet'};
 const STATUS_MAP = {
   0:{label:'Shopping Cart',cls:'s-other'},
   1:{label:'Completed',    cls:'s-completed'},
@@ -265,8 +265,11 @@ function today()    {return new Date().toISOString().slice(0,10)}
 function daysAgo(n) {const d=new Date();d.setDate(d.getDate()-n);return d.toISOString().slice(0,10)}
 function show(id,d='block'){document.getElementById(id).style.display=d}
 function hide(id)   {document.getElementById(id).style.display='none'}
-function srcName(o) {return SRC_MAP[o.OrderSource]||'Other'}
+
 function statusInfo(o){return STATUS_MAP[o.StatusCode]||{label:'Unknown',cls:'s-other'}}
+function companyName(o){return (o.CompanyName||'').trim()||'—'}
+function isINum(sku){return sku&&/^i\d+$/i.test(sku.trim())}
+function orderHasINum(o){return (o.Items||[]).some(it=>isINum(it.ProductID)||isINum(it.InventoryKey))}
 
 function isCacheable(iso){
   const c=new Date();c.setDate(c.getDate()-2);c.setHours(0,0,0,0);
@@ -330,8 +333,8 @@ async function loadOrders(){
 }
 
 function buildFilters(){
-  const sources=[...new Set(allOrders.map(srcName))].sort();
-  const ss=document.getElementById('src-filter');const sv=ss.value;
+  const companies=[...new Set(allOrders.map(companyName))].filter(s=>s&&s!=='—').sort();
+  const ss=document.getElementById('company-filter');const sv=ss.value;
   ss.innerHTML='<option value="">all sources</option>';
   sources.forEach(s=>{const o=document.createElement('option');o.value=s;o.textContent=s;ss.appendChild(o)});
   if(sources.includes(sv))ss.value=sv;
@@ -345,13 +348,15 @@ function buildFilters(){
 
 function applyFilters(){
   const q=document.getElementById('search-inp').value.toLowerCase();
-  const src=document.getElementById('src-filter').value;
+  const co=document.getElementById('company-filter').value;
   const st=document.getElementById('status-filter').value;
+  const iOnly=document.getElementById('inumber-toggle').classList.contains('active');
   filtered=allOrders.filter(o=>{
-    if(src&&srcName(o)!==src)return false;
+    if(co&&companyName(o)!==co)return false;
     if(st&&statusInfo(o).label!==st)return false;
+    if(iOnly&&!orderHasINum(o))return false;
     if(q){
-      const hay=[(o.OrderSourceOrderID||''),(o.FirstName||'')+' '+(o.LastName||''),srcName(o),String(o.GrandTotal||''),statusInfo(o).label].join(' ').toLowerCase();
+      const hay=[(o.OrderSourceOrderID||''),(o.FirstName||'')+' '+(o.LastName||''),companyName(o),String(o.GrandTotal||''),statusInfo(o).label].join(' ').toLowerCase();
       if(!hay.includes(q))return false;
     }
     return true;
@@ -362,7 +367,7 @@ function applyFilters(){
 function doSort(){
   filtered.sort((a,b)=>{
     let av,bv;
-    if(sortCol==='source')     {av=srcName(a);bv=srcName(b)}
+    if(sortCol==='source')     {av=companyName(a);bv=companyName(b)}
     else if(sortCol==='srcOrderId'){av=a.OrderSourceOrderID||'';bv=b.OrderSourceOrderID||''}
     else if(sortCol==='status'){av=statusInfo(a).label;bv=statusInfo(b).label}
     else if(sortCol==='items') {av=(a.Items||[]).length;bv=(b.Items||[]).length}
@@ -377,7 +382,7 @@ function doSort(){
 function renderSummary(){
   const rev=filtered.reduce((s,o)=>s+(o.GrandTotal||0),0);
   const bySrc={};
-  filtered.forEach(o=>{const s=srcName(o);if(!bySrc[s])bySrc[s]={n:0,r:0};bySrc[s].n++;bySrc[s].r+=o.GrandTotal||0});
+  filtered.forEach(o=>{const s=companyName(o);if(!bySrc[s])bySrc[s]={n:0,r:0};bySrc[s].n++;bySrc[s].r+=o.GrandTotal||0});
   const el=document.getElementById('summary');
   let h=`
     <div class="metric highlight fade-in">
@@ -430,17 +435,16 @@ function renderTable(){
     // Add top border when a new group starts (and it's not the very first row)
     const isNewGroup=!sameId&&i>0;
 
-    const sn=srcName(o);
-    const bc=BADGE_CLS[sn]||'b-other';
+    const sn=companyName(o);
     const si=statusInfo(o);
     const dt=o.TimeOfOrder?new Date(o.TimeOfOrder).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}):'—';
     const amt=o.GrandTotal!=null?'$'+Number(o.GrandTotal).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}):'—';
     const skus=(o.Items||[]).map(it=>`<span class="sku-pill">${it.ProductID||it.InventoryKey||'—'} ×${it.Qty||1}</span>`).join('');
-    const scUrl=`${SC_BASE}/Orders/Detail/${o.ID}`;
+    const scUrl=`${SC_BASE}/Orders/Detail.aspx?id=${o.ID}`;
     const rowCls=[isGroupCont?'group-cont':'group-first',isNewGroup?'group-start-border':''].filter(Boolean).join(' ');
 
     return `<tr class="${rowCls}">`+vcols.map(c=>{
-      if(c.k==='source')      return `<td><span class="badge ${bc}">${sn}</span></td>`;
+      if(c.k==='source')      return `<td style="font-family:var(--mono);font-size:11px;color:var(--text2)">${companyName(o)}</td>`;
       if(c.k==='srcOrderId')  return isGroupCont
         ?`<td><span class="order-id-cont">↳ ${o.OrderSourceOrderID||('#'+o.ID)||'—'}</span></td>`
         :`<td><a class="order-link" href="${scUrl}" target="_blank">${o.OrderSourceOrderID||('#'+o.ID)||'—'}</a></td>`;
@@ -487,8 +491,13 @@ document.getElementById('date-to').value=today();
 buildColToggles();
 document.getElementById('load-btn').addEventListener('click',loadOrders);
 document.getElementById('search-inp').addEventListener('input',()=>{if(allOrders.length)applyFilters()});
-document.getElementById('src-filter').addEventListener('change',()=>{if(allOrders.length)applyFilters()});
+document.getElementById('company-filter').addEventListener('change',()=>{if(allOrders.length)applyFilters()});
 document.getElementById('status-filter').addEventListener('change',()=>{if(allOrders.length)applyFilters()});
+document.getElementById('inumber-toggle').addEventListener('click',()=>{
+  const btn=document.getElementById('inumber-toggle');
+  btn.classList.toggle('active');
+  if(allOrders.length)applyFilters();
+});
 </script>
 </body>
 </html>
