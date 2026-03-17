@@ -19,7 +19,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--s
 #app{display:flex;flex-direction:column;min-height:100vh}
 
 /* Topbar */
-.topbar{height:52px;background:var(--bg2);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 24px;flex-shrink:0}
+.topbar{height:52px;background:var(--bg2);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 24px;flex-shrink:0;gap:16px}
 .topbar-left{display:flex;align-items:center;gap:12px}
 .topbar-logo{font-family:var(--mono);font-size:11px;font-weight:500;letter-spacing:0.15em;text-transform:uppercase;color:var(--text2)}
 .topbar-logo span{color:var(--accent)}
@@ -52,10 +52,10 @@ select option{background:var(--bg3)}
 .ctog input{display:none}
 
 /* Tabs */
-.tabs{display:flex;gap:0;background:var(--bg2);border-bottom:1px solid var(--border);padding:0 24px}
-.tab{font-family:var(--mono);font-size:11px;letter-spacing:0.06em;text-transform:uppercase;padding:12px 20px;cursor:pointer;color:var(--text3);border-bottom:2px solid transparent;transition:all 0.15s;user-select:none}
-.tab:hover{color:var(--text2)}
-.tab.active{color:var(--accent);border-bottom-color:var(--accent)}
+.tabs{display:flex;gap:4px;align-items:center}
+.tab{font-family:var(--mono);font-size:10px;letter-spacing:0.06em;text-transform:uppercase;padding:5px 14px;cursor:pointer;color:var(--text3);border:1px solid transparent;border-radius:20px;transition:all 0.15s;user-select:none;white-space:nowrap}
+.tab:hover{color:var(--text2);border-color:var(--border2)}
+.tab.active{color:var(--accent);border-color:rgba(79,142,247,0.4);background:rgba(79,142,247,0.08)}
 
 /* Summary */
 .summary{padding:16px 24px;display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px;border-bottom:1px solid var(--border)}
@@ -169,6 +169,10 @@ tr.group-subtotal:hover td{background:rgba(79,142,247,0.07)}
       <div class="topbar-divider"></div>
       <div class="topbar-sub">Sales Hub</div>
     </div>
+    <div class="tabs" id="tabs" style="display:none">
+      <div class="tab active" data-tab="orders">Orders</div>
+      <div class="tab" data-tab="unpicked">Unpicked Items</div>
+    </div>
     <span><span class="pulse"></span><span style="font-family:var(--mono);font-size:10px;color:var(--text3)">connected</span></span>
   </div>
 
@@ -199,11 +203,6 @@ tr.group-subtotal:hover td{background:rgba(79,142,247,0.07)}
     <div class="log-box" id="log-box"></div>
   </div>
 
-  <!-- Tabs -->
-  <div class="tabs" id="tabs" style="display:none">
-    <div class="tab active" data-tab="orders">Orders</div>
-    <div class="tab" data-tab="unpicked">Unpicked Items</div>
-  </div>
 
   <!-- Orders tab -->
   <div id="tab-orders">
