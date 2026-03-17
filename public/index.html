@@ -264,7 +264,7 @@ let allOrders=[], filtered=[];
 let sortCol='srcOrderId', sortDir=1;
 let currentPage=1;
 const PAGE_SIZE=99999;
-const CACHE='sc_hub_v2_';
+const CACHE='sc_hub_v3_';
 
 const COLS=[
   {k:'source',      label:'Source',      vis:true},
@@ -347,26 +347,38 @@ async function loadOrders(){
   clearLog();hide('table-section');hide('empty-msg');hide('summary');
   document.getElementById('load-btn').disabled=true;
   document.getElementById('load-btn').textContent='loading...';
-  allOrders=[];const dates=dateRange(from,to);let total=0;
+  allOrders=[];
 
-  for(const d of dates){
-    if(isCacheable(d)){
-      const cached=cGet(d);
-      if(cached){addLog(d,`${cached.length} orders  (cached)`,'done');allOrders=allOrders.concat(cached);total+=cached.length;continue}
-    }
-    addLog(d,'fetching...','active');
+  // Check cache for the full range key
+  const rangeKey=`${from}_${to}`;
+  const cached=cGet(rangeKey);
+  if(cached){
+    addLog(from+' → '+to,`${cached.length} orders  (cached)`,'done');
+    allOrders=cached;
+  } else {
+    addLog(from+' → '+to,'fetching...','active');
     try{
-      const res=await fetch(`/api/orders/day?date=${d}`);
-      if(!res.ok){const err=await res.json().catch(()=>({}));updateLog(d,'error: '+(err.error||res.statusText),'err');continue}
+      const res=await fetch(`/api/orders/day?date=${from}&dateTo=${to}`);
+      if(!res.ok){
+        const err=await res.json().catch(()=>({}));
+        updateLog(from+' → '+to,'error: '+(err.error||res.statusText),'err');
+        document.getElementById('load-btn').disabled=false;
+        document.getElementById('load-btn').textContent='load orders';
+        return;
+      }
       const data=await res.json();
-      const orders=data.orders||[];
-      if(isCacheable(d))cSet(d,orders);
-      allOrders=allOrders.concat(orders);total+=orders.length;
-      updateLog(d,`${orders.length} orders`,'done');
-    }catch(e){updateLog(d,'error: '+e.message,'err')}
+      allOrders=data.orders||[];
+      cSet(rangeKey,allOrders);
+      updateLog(from+' → '+to,`${allOrders.length} orders`,'done');
+    }catch(e){
+      updateLog(from+' → '+to,'error: '+e.message,'err');
+      document.getElementById('load-btn').disabled=false;
+      document.getElementById('load-btn').textContent='load orders';
+      return;
+    }
   }
 
-  addLog('',`✓  done — ${total.toLocaleString()} orders loaded`,'info');
+  addLog('',`✓  done — ${allOrders.length.toLocaleString()} orders loaded`,'info');
   document.getElementById('load-btn').disabled=false;
   document.getElementById('load-btn').textContent='load orders';
   buildFilters();applyFilters();renderSummary();
