@@ -87,18 +87,21 @@ app.get('/health', (req, res) => {
 });
 
 // Fetch orders for a single date — called per-day by the frontend
-// GET /api/orders/day?date=2025-03-10
+// GET /api/orders/day?date=2025-03-10&dateTo=2025-03-17 (dateTo optional, defaults to date)
 app.get('/api/orders/day', async (req, res) => {
-  const { date } = req.query;
+  const { date, dateTo } = req.query;
   if (!date) return res.status(400).json({ error: 'date param required (YYYY-MM-DD)' });
 
   try {
     const token = await getToken();
 
-    // Build date range: full day — format required by SC: yyyy/MM/dd
     const [y, m, d] = date.split('-');
     const from = `${y}/${m}/${d}`;
-    const to   = `${y}/${m}/${d}`;
+    let to = from;
+    if (dateTo) {
+      const [y2, m2, d2] = dateTo.split('-');
+      to = `${y2}/${m2}/${d2}`;
+    }
 
     let pageNum = 1;
     const pageSize = 50;
@@ -109,8 +112,8 @@ app.get('/api/orders/day', async (req, res) => {
       const url = new URL(`https://${SC_SERVER}/rest/api/Orders`);
       url.searchParams.set('pageSize', pageSize);
       url.searchParams.set('pageNumber', pageNum);
-      url.searchParams.set('model.OrderFromDate', from);
-      url.searchParams.set('model.OrderToDate', to);
+      url.searchParams.set('model.createdOnFrom', from);
+      url.searchParams.set('model.createdOnTo', to);
 
       const scRes = await fetch(url.toString(), {
         headers: {
