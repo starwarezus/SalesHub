@@ -26,26 +26,18 @@
   }
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   html, body { height: 100%; background: var(--bg); color: var(--text); font-family: var(--sans); font-size: 14px; }
-
-  /* ── Layout ── */
   #app { display: flex; flex-direction: column; min-height: 100vh; }
 
-  /* ── Topbar ── */
   .topbar {
     height: 52px; background: var(--bg2); border-bottom: 1px solid var(--border);
-    display: flex; align-items: center; justify-content: space-between;
-    padding: 0 24px; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: space-between; padding: 0 24px; flex-shrink: 0;
   }
   .topbar-left { display: flex; align-items: center; gap: 12px; }
-  .topbar-logo {
-    font-family: var(--mono); font-size: 11px; font-weight: 500;
-    letter-spacing: 0.15em; text-transform: uppercase; color: var(--text2);
-  }
+  .topbar-logo { font-family: var(--mono); font-size: 11px; font-weight: 500; letter-spacing: 0.15em; text-transform: uppercase; color: var(--text2); }
   .topbar-logo span { color: var(--accent); }
   .topbar-divider { width: 1px; height: 16px; background: var(--border2); }
   .topbar-sub { font-family: var(--mono); font-size: 10px; color: var(--text3); letter-spacing: 0.08em; }
 
-  /* ── Controls ── */
   .controls {
     background: var(--bg2); border-bottom: 1px solid var(--border);
     padding: 12px 24px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
@@ -54,27 +46,23 @@
   .ctrl-label { font-family: var(--mono); font-size: 10px; color: var(--text3); letter-spacing: 0.08em; text-transform: uppercase; }
   input[type=date], input[type=text], select {
     background: var(--bg3); border: 1px solid var(--border2); border-radius: 6px;
-    color: var(--text); font-family: var(--mono); font-size: 12px;
-    padding: 6px 10px; outline: none; transition: border-color 0.15s;
+    color: var(--text); font-family: var(--mono); font-size: 12px; padding: 6px 10px; outline: none; transition: border-color 0.15s;
   }
   input[type=date]:focus, input[type=text]:focus, select:focus { border-color: var(--accent); }
   select option { background: var(--bg3); }
   .vsep { width: 1px; height: 22px; background: var(--border); flex-shrink: 0; }
 
-  /* ── Buttons ── */
   .btn {
     font-family: var(--mono); font-size: 11px; font-weight: 500; letter-spacing: 0.05em;
     padding: 7px 16px; border-radius: 6px; border: 1px solid var(--border2);
-    background: transparent; color: var(--text); cursor: pointer; transition: all 0.15s;
-    white-space: nowrap;
+    background: transparent; color: var(--text); cursor: pointer; transition: all 0.15s; white-space: nowrap;
   }
-  .btn:hover { background: var(--bg4); border-color: var(--border2); }
+  .btn:hover { background: var(--bg4); }
   .btn:disabled { opacity: 0.35; cursor: not-allowed; }
   .btn-primary { background: var(--accent); border-color: var(--accent); color: #fff; }
   .btn-primary:hover { background: #3d7de8; border-color: #3d7de8; }
   .btn-sm { padding: 4px 10px; font-size: 10px; }
 
-  /* ── Column toggles ── */
   .col-toggles { display: flex; gap: 5px; flex-wrap: wrap; }
   .ctog {
     display: inline-flex; align-items: center; gap: 5px; cursor: pointer;
@@ -86,136 +74,126 @@
   .ctog.active { border-color: var(--accent); color: var(--accent); }
   .ctog input { display: none; }
 
-  /* ── Summary cards ── */
   .summary {
     padding: 16px 24px; display: grid;
     grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px;
     border-bottom: 1px solid var(--border);
   }
-  .metric {
-    background: var(--bg2); border: 1px solid var(--border);
-    border-radius: 8px; padding: 12px 14px;
-  }
+  .metric { background: var(--bg2); border: 1px solid var(--border); border-radius: 8px; padding: 12px 14px; }
   .metric-label { font-family: var(--mono); font-size: 9px; color: var(--text3); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 6px; }
   .metric-val { font-family: var(--mono); font-size: 20px; font-weight: 500; color: var(--text); line-height: 1; }
   .metric-sub { font-family: var(--mono); font-size: 11px; color: var(--text3); margin-top: 4px; }
   .metric.highlight { border-color: rgba(79,142,247,0.25); background: rgba(79,142,247,0.05); }
   .metric.highlight .metric-val { color: var(--accent); }
 
-  /* ── Log box ── */
   .log-section { padding: 12px 24px; }
   .log-box {
-    background: var(--bg2); border: 1px solid var(--border);
-    border-radius: 8px; padding: 10px 14px;
-    font-family: var(--mono); font-size: 11px;
-    max-height: 120px; overflow-y: auto;
+    background: var(--bg2); border: 1px solid var(--border); border-radius: 8px;
+    padding: 10px 14px; font-family: var(--mono); font-size: 11px; max-height: 120px; overflow-y: auto;
   }
   .log-box::-webkit-scrollbar { width: 4px; }
-  .log-box::-webkit-scrollbar-track { background: transparent; }
   .log-box::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
   .log-line { display: flex; gap: 10px; padding: 1.5px 0; align-items: baseline; }
   .log-date { color: var(--text3); min-width: 82px; flex-shrink: 0; }
   .log-msg { color: var(--text2); }
-  .log-line.done .log-msg { color: var(--green); }
-  .log-line.active .log-msg { color: var(--text); }
-  .log-line.err .log-msg { color: var(--red); }
-  .log-line.info .log-msg { color: var(--accent); font-weight: 500; }
+  .log-line.done .log-msg  { color: var(--green); }
+  .log-line.active .log-msg{ color: var(--text); }
+  .log-line.err .log-msg   { color: var(--red); }
+  .log-line.info .log-msg  { color: var(--accent); font-weight: 500; }
 
-  /* ── Table ── */
   .table-section { padding: 0 24px 24px; flex: 1; }
-  .table-wrap {
-    border: 1px solid var(--border); border-radius: 8px;
-    overflow: auto;
-  }
+  .table-wrap { border: 1px solid var(--border); border-radius: 8px; overflow: auto; }
   .table-wrap::-webkit-scrollbar { height: 5px; }
-  .table-wrap::-webkit-scrollbar-track { background: transparent; }
   .table-wrap::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
   table { width: 100%; border-collapse: collapse; font-size: 12px; }
   thead { background: var(--bg2); position: sticky; top: 0; z-index: 1; }
   th {
     padding: 10px 14px; text-align: left; font-family: var(--mono);
-    font-size: 9px; font-weight: 500; color: var(--text3);
-    letter-spacing: 0.1em; text-transform: uppercase;
-    border-bottom: 1px solid var(--border);
-    white-space: nowrap; cursor: pointer; user-select: none;
-    transition: color 0.15s;
+    font-size: 9px; font-weight: 500; color: var(--text3); letter-spacing: 0.1em; text-transform: uppercase;
+    border-bottom: 1px solid var(--border); white-space: nowrap; cursor: pointer; user-select: none; transition: color 0.15s;
   }
   th:hover { color: var(--text2); }
   th.sorted { color: var(--accent); }
   th .sa { margin-left: 4px; font-size: 9px; opacity: 0.5; }
   th.sorted .sa { opacity: 1; }
-  td {
-    padding: 9px 14px; border-bottom: 1px solid var(--border);
-    color: var(--text); vertical-align: middle; font-family: var(--sans);
-  }
+  td { padding: 8px 14px; border-bottom: 1px solid var(--border); color: var(--text); vertical-align: middle; }
   tr:last-child td { border-bottom: none; }
   tr:hover td { background: var(--bg2); }
 
-  /* ── Badges ── */
+  /* Grouped rows */
+  tr.group-first td:first-child { border-left: 2px solid rgba(79,142,247,0.5); }
+  tr.group-cont td              { background: rgba(79,142,247,0.025); }
+  tr.group-cont td:first-child  { border-left: 2px solid rgba(79,142,247,0.18); }
+  tr.group-cont:hover td        { background: var(--bg2); }
+  tr.group-start-border td      { border-top: 1px solid var(--border2); }
+
+  /* Source badges */
   .badge {
     display: inline-block; padding: 2px 8px; border-radius: 20px;
-    font-family: var(--mono); font-size: 9px; font-weight: 500;
-    letter-spacing: 0.06em; text-transform: uppercase; white-space: nowrap;
+    font-family: var(--mono); font-size: 9px; font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; white-space: nowrap;
   }
-  .b-amazon  { background: rgba(255,153,0,0.15);  color: #ffaa33; border: 1px solid rgba(255,153,0,0.25); }
-  .b-ebay    { background: rgba(228,49,55,0.15);  color: #f47070; border: 1px solid rgba(228,49,55,0.25); }
-  .b-walmart { background: rgba(0,113,206,0.15);  color: #5aadff; border: 1px solid rgba(0,113,206,0.25); }
-  .b-etsy    { background: rgba(245,100,0,0.15);  color: #ff8533; border: 1px solid rgba(245,100,0,0.25); }
-  .b-jet     { background: rgba(255,110,0,0.15);  color: #ff9955; border: 1px solid rgba(255,110,0,0.25); }
+  .b-amazon  { background: rgba(255,153,0,0.15);   color: #ffaa33; border: 1px solid rgba(255,153,0,0.25); }
+  .b-ebay    { background: rgba(228,49,55,0.15);   color: #f47070; border: 1px solid rgba(228,49,55,0.25); }
+  .b-walmart { background: rgba(0,113,206,0.15);   color: #5aadff; border: 1px solid rgba(0,113,206,0.25); }
+  .b-etsy    { background: rgba(245,100,0,0.15);   color: #ff8533; border: 1px solid rgba(245,100,0,0.25); }
+  .b-jet     { background: rgba(255,110,0,0.15);   color: #ff9955; border: 1px solid rgba(255,110,0,0.25); }
   .b-other   { background: rgba(255,255,255,0.05); color: var(--text3); border: 1px solid var(--border); }
 
-  /* ── SKU pills ── */
+  /* Status badges */
+  .status-badge {
+    display: inline-block; padding: 2px 8px; border-radius: 4px;
+    font-family: var(--mono); font-size: 9px; font-weight: 500; letter-spacing: 0.05em; text-transform: uppercase; white-space: nowrap;
+  }
+  .s-completed { background: rgba(62,207,142,0.12);  color: #3ecf8e; border: 1px solid rgba(62,207,142,0.25); }
+  .s-shipped   { background: rgba(79,142,247,0.12);  color: #4f8ef7; border: 1px solid rgba(79,142,247,0.25); }
+  .s-inprocess { background: rgba(246,173,85,0.12);  color: #f6ad55; border: 1px solid rgba(246,173,85,0.25); }
+  .s-cancelled { background: rgba(245,101,101,0.12); color: #f56565; border: 1px solid rgba(245,101,101,0.25); }
+  .s-onhold    { background: rgba(159,122,234,0.12); color: #b794f4; border: 1px solid rgba(159,122,234,0.25); }
+  .s-problem   { background: rgba(245,101,101,0.10); color: #fc8181; border: 1px solid rgba(245,101,101,0.2); }
+  .s-other     { background: rgba(255,255,255,0.05); color: var(--text3); border: 1px solid var(--border); }
+
+  /* Order ID */
+  .order-link {
+    color: var(--accent); font-family: var(--mono); font-size: 11px; text-decoration: none;
+    border-bottom: 1px dashed rgba(79,142,247,0.35); transition: all 0.15s;
+  }
+  .order-link:hover { color: #7ab3ff; border-bottom-color: rgba(79,142,247,0.7); }
+  .order-id-cont { font-family: var(--mono); font-size: 11px; color: var(--text3); padding-left: 6px; }
+
+  /* SKU pills */
   .sku-list { display: flex; flex-wrap: wrap; gap: 4px; }
   .sku-pill {
-    background: var(--bg3); border: 1px solid var(--border);
-    border-radius: 4px; padding: 1px 7px;
-    font-family: var(--mono); font-size: 10px; color: var(--text2);
-    white-space: nowrap;
+    background: var(--bg3); border: 1px solid var(--border); border-radius: 4px;
+    padding: 1px 7px; font-family: var(--mono); font-size: 10px; color: var(--text2); white-space: nowrap;
   }
 
-  /* ── Pagination ── */
   .pagination {
-    display: flex; align-items: center; gap: 8px;
-    padding: 12px 0 0; font-family: var(--mono); font-size: 11px; color: var(--text3);
+    display: flex; align-items: center; gap: 8px; padding: 12px 0 0;
+    font-family: var(--mono); font-size: 11px; color: var(--text3);
   }
-  .pagination span { margin-right: 4px; }
+  .empty { padding: 60px 24px; text-align: center; font-family: var(--mono); font-size: 12px; color: var(--text3); letter-spacing: 0.05em; }
 
-  /* ── Empty state ── */
-  .empty {
-    padding: 60px 24px; text-align: center;
-    font-family: var(--mono); font-size: 12px; color: var(--text3); letter-spacing: 0.05em;
-  }
-
-  /* ── Scrollbar global ── */
   ::-webkit-scrollbar { width: 6px; height: 6px; }
   ::-webkit-scrollbar-track { background: transparent; }
   ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
-
-  /* ── Animations ── */
-  @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+  @keyframes fadeIn { from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none} }
   .fade-in { animation: fadeIn 0.2s ease forwards; }
-
-  /* ── Pulse dot ── */
-  .pulse { display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--green); margin-right: 6px; animation: pulse 2s infinite; }
-  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+  .pulse { display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--green);margin-right:6px;animation:pulse 2s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1}50%{opacity:0.3} }
 </style>
 </head>
 <body>
 <div id="app">
 
-  <!-- Topbar -->
   <div class="topbar">
     <div class="topbar-left">
       <div class="topbar-logo">Gold Label <span>NY</span></div>
       <div class="topbar-divider"></div>
       <div class="topbar-sub">Sales Hub</div>
     </div>
-    <div style="display:flex;align-items:center;gap:8px">
-      <span id="token-dot" style="display:none"><span class="pulse"></span><span style="font-family:var(--mono);font-size:10px;color:var(--text3)">connected</span></span>
-    </div>
+    <span><span class="pulse"></span><span style="font-family:var(--mono);font-size:10px;color:var(--text3)">connected</span></span>
   </div>
 
-  <!-- Controls -->
   <div class="controls">
     <div class="ctrl-group">
       <span class="ctrl-label">From</span>
@@ -229,299 +207,288 @@
     <input type="text" id="search-inp" placeholder="search orders..." style="width:180px"/>
     <div class="vsep"></div>
     <select id="src-filter"><option value="">all sources</option></select>
+    <select id="status-filter"><option value="">all statuses</option></select>
     <div class="vsep"></div>
     <button class="btn btn-primary" id="load-btn">load orders</button>
     <div class="vsep"></div>
     <div class="col-toggles" id="col-toggles"></div>
   </div>
 
-  <!-- Summary -->
   <div class="summary" id="summary" style="display:none"></div>
 
-  <!-- Log -->
   <div class="log-section" id="log-section" style="display:none">
     <div class="log-box" id="log-box"></div>
   </div>
 
-  <!-- Table -->
   <div class="table-section" id="table-section" style="display:none">
     <div class="table-wrap">
-      <table>
-        <thead id="tbl-head"></thead>
-        <tbody id="tbl-body"></tbody>
-      </table>
+      <table><thead id="tbl-head"></thead><tbody id="tbl-body"></tbody></table>
     </div>
     <div class="pagination" id="pagination"></div>
   </div>
 
   <div class="empty" id="empty-msg" style="display:none">— no orders found for this period —</div>
-
 </div>
 
 <script>
-const SRC = {0:'Other',1:'Amazon',2:'eBay',3:'Walmart',4:'Etsy',5:'Jet',6:'Overstock',7:'Newegg',8:'Sears',9:'Best Buy',10:'Rakuten',11:'Houzz',12:'Wayfair',13:'Target',14:'Wish'};
+const SC_BASE   = 'https://blny.sellercloud.com';
+const SRC_MAP   = {0:'Other',1:'Amazon',2:'eBay',3:'Walmart',4:'Etsy',5:'Jet',6:'Overstock',7:'Newegg',8:'Sears',9:'Best Buy',10:'Rakuten',11:'Houzz',12:'Wayfair',13:'Target',14:'Wish'};
 const BADGE_CLS = {Amazon:'b-amazon',eBay:'b-ebay',Walmart:'b-walmart',Etsy:'b-etsy',Jet:'b-jet'};
+const STATUS_MAP = {
+  0:{label:'Shopping Cart',cls:'s-other'},
+  1:{label:'Completed',    cls:'s-completed'},
+  2:{label:'In Process',   cls:'s-inprocess'},
+  3:{label:'Problem Order',cls:'s-problem'},
+  4:{label:'On Hold',      cls:'s-onhold'},
+  5:{label:'Cancelled',    cls:'s-cancelled'},
+  6:{label:'Quote',        cls:'s-other'},
+  7:{label:'Void',         cls:'s-cancelled'},
+  8:{label:'Fully Shipped',cls:'s-shipped'},
+};
 
-let allOrders = [], filtered = [];
-let sortCol = 'TimeOfOrder', sortDir = -1;
-let currentPage = 1;
-const PAGE_SIZE = 50;
-const CACHE_PREFIX = 'sc_hub_v1_';
+let allOrders=[], filtered=[];
+let sortCol='srcOrderId', sortDir=1;
+let currentPage=1;
+const PAGE_SIZE=50;
+const CACHE='sc_hub_v2_';
 
-const COLS = [
-  { k: 'source',      label: 'Source',     vis: true },
-  { k: 'srcOrderId',  label: 'Order ID',   vis: true },
-  { k: 'TimeOfOrder', label: 'Date',        vis: true },
-  { k: 'GrandTotal',  label: 'Total',       vis: true },
-  { k: 'items',       label: 'Items / SKUs',vis: true },
+const COLS=[
+  {k:'source',      label:'Source',      vis:true},
+  {k:'srcOrderId',  label:'Order ID',    vis:true},
+  {k:'status',      label:'Status',      vis:true},
+  {k:'TimeOfOrder', label:'Date',         vis:true},
+  {k:'GrandTotal',  label:'Total',        vis:true},
+  {k:'items',       label:'Items / SKUs', vis:true},
 ];
 
-// ── Helpers ──────────────────────────────────────────────────────────────────
-function today()      { return new Date().toISOString().slice(0, 10); }
-function daysAgo(n)   { const d = new Date(); d.setDate(d.getDate() - n); return d.toISOString().slice(0, 10); }
-function show(id, d='block') { document.getElementById(id).style.display = d; }
-function hide(id)     { document.getElementById(id).style.display = 'none'; }
-function srcName(o)   { return SRC[o.OrderSource] || 'Other'; }
+function today()    {return new Date().toISOString().slice(0,10)}
+function daysAgo(n) {const d=new Date();d.setDate(d.getDate()-n);return d.toISOString().slice(0,10)}
+function show(id,d='block'){document.getElementById(id).style.display=d}
+function hide(id)   {document.getElementById(id).style.display='none'}
+function srcName(o) {return SRC_MAP[o.OrderSource]||'Other'}
+function statusInfo(o){return STATUS_MAP[o.StatusCode]||{label:'Unknown',cls:'s-other'}}
 
-function isCacheable(iso) {
-  const cutoff = new Date(); cutoff.setDate(cutoff.getDate() - 2); cutoff.setHours(0,0,0,0);
-  return new Date(iso) < cutoff;
+function isCacheable(iso){
+  const c=new Date();c.setDate(c.getDate()-2);c.setHours(0,0,0,0);
+  return new Date(iso)<c;
 }
-function cGet(k) { try { const v = sessionStorage.getItem(CACHE_PREFIX + k); return v ? JSON.parse(v) : null; } catch { return null; } }
-function cSet(k, v) { try { sessionStorage.setItem(CACHE_PREFIX + k, JSON.stringify(v)); } catch {} }
+function cGet(k){try{const v=sessionStorage.getItem(CACHE+k);return v?JSON.parse(v):null}catch{return null}}
+function cSet(k,v){try{sessionStorage.setItem(CACHE+k,JSON.stringify(v))}catch{}}
 
-// ── Log ───────────────────────────────────────────────────────────────────────
-function addLog(dateKey, msg, type = 'active') {
+function addLog(key,msg,type='active'){
   show('log-section');
-  const box = document.getElementById('log-box');
-  const el = document.createElement('div');
-  el.className = 'log-line ' + type;
-  el.dataset.key = dateKey;
-  el.innerHTML = `<span class="log-date">${dateKey}</span><span class="log-msg">${msg}</span>`;
-  box.appendChild(el);
-  box.scrollTop = box.scrollHeight;
+  const box=document.getElementById('log-box');
+  const el=document.createElement('div');
+  el.className='log-line '+type;el.dataset.key=key;
+  el.innerHTML=`<span class="log-date">${key}</span><span class="log-msg">${msg}</span>`;
+  box.appendChild(el);box.scrollTop=box.scrollHeight;
 }
-function updateLog(dateKey, msg, type) {
-  const box = document.getElementById('log-box');
-  const el = [...box.querySelectorAll('.log-line')].find(e => e.dataset.key === dateKey);
-  if (el) { el.className = 'log-line ' + type; el.querySelector('.log-msg').textContent = msg; }
+function updateLog(key,msg,type){
+  const el=[...document.getElementById('log-box').querySelectorAll('.log-line')].find(e=>e.dataset.key===key);
+  if(el){el.className='log-line '+type;el.querySelector('.log-msg').textContent=msg}
 }
-function clearLog() { document.getElementById('log-box').innerHTML = ''; hide('log-section'); }
+function clearLog(){document.getElementById('log-box').innerHTML='';hide('log-section')}
 
-// ── Date range ────────────────────────────────────────────────────────────────
-function dateRange(from, to) {
-  const out = [];
-  let cur = new Date(from + 'T00:00:00');
-  const end = new Date(to + 'T00:00:00');
-  while (cur <= end) { out.push(cur.toISOString().slice(0, 10)); cur.setDate(cur.getDate() + 1); }
+function dateRange(from,to){
+  const out=[];let cur=new Date(from+'T00:00:00');const end=new Date(to+'T00:00:00');
+  while(cur<=end){out.push(cur.toISOString().slice(0,10));cur.setDate(cur.getDate()+1)}
   return out;
 }
 
-// ── Load orders ───────────────────────────────────────────────────────────────
-async function loadOrders() {
-  const from = document.getElementById('date-from').value;
-  const to   = document.getElementById('date-to').value;
-  if (!from || !to) return;
+async function loadOrders(){
+  const from=document.getElementById('date-from').value;
+  const to=document.getElementById('date-to').value;
+  if(!from||!to)return;
+  clearLog();hide('table-section');hide('empty-msg');hide('summary');
+  document.getElementById('load-btn').disabled=true;
+  document.getElementById('load-btn').textContent='loading...';
+  allOrders=[];const dates=dateRange(from,to);let total=0;
 
-  clearLog();
-  hide('table-section'); hide('empty-msg'); hide('summary');
-  document.getElementById('load-btn').disabled = true;
-  document.getElementById('load-btn').textContent = 'loading...';
-
-  allOrders = [];
-  const dates = dateRange(from, to);
-  let total = 0;
-
-  for (const d of dates) {
-    if (isCacheable(d)) {
-      const cached = cGet(d);
-      if (cached) {
-        addLog(d, `${cached.length} orders  (cached)`, 'done');
-        allOrders = allOrders.concat(cached);
-        total += cached.length;
-        continue;
-      }
+  for(const d of dates){
+    if(isCacheable(d)){
+      const cached=cGet(d);
+      if(cached){addLog(d,`${cached.length} orders  (cached)`,'done');allOrders=allOrders.concat(cached);total+=cached.length;continue}
     }
-    addLog(d, 'fetching...', 'active');
-    try {
-      const res = await fetch(`/api/orders/day?date=${d}`);
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({ error: res.statusText }));
-        updateLog(d, 'error: ' + (err.error || res.statusText), 'err');
-        continue;
-      }
-      const data = await res.json();
-      const orders = data.orders || [];
-      if (isCacheable(d)) cSet(d, orders);
-      allOrders = allOrders.concat(orders);
-      total += orders.length;
-      updateLog(d, `${orders.length} orders`, 'done');
-    } catch (e) {
-      updateLog(d, 'error: ' + e.message, 'err');
-    }
+    addLog(d,'fetching...','active');
+    try{
+      const res=await fetch(`/api/orders/day?date=${d}`);
+      if(!res.ok){const err=await res.json().catch(()=>({}));updateLog(d,'error: '+(err.error||res.statusText),'err');continue}
+      const data=await res.json();
+      const orders=data.orders||[];
+      if(isCacheable(d))cSet(d,orders);
+      allOrders=allOrders.concat(orders);total+=orders.length;
+      updateLog(d,`${orders.length} orders`,'done');
+    }catch(e){updateLog(d,'error: '+e.message,'err')}
   }
 
-  addLog('', `✓  done — ${total.toLocaleString()} orders loaded`, 'info');
-
-  document.getElementById('load-btn').disabled = false;
-  document.getElementById('load-btn').textContent = 'load orders';
-
-  buildSrcFilter();
-  applyFilters();
-  renderSummary();
-  show('summary', 'grid');
-  if (filtered.length > 0) { show('table-section'); hide('empty-msg'); }
-  else { hide('table-section'); show('empty-msg'); }
+  addLog('',`✓  done — ${total.toLocaleString()} orders loaded`,'info');
+  document.getElementById('load-btn').disabled=false;
+  document.getElementById('load-btn').textContent='load orders';
+  buildFilters();applyFilters();renderSummary();
+  show('summary','grid');
+  filtered.length>0?(show('table-section'),hide('empty-msg')):(hide('table-section'),show('empty-msg'));
 }
 
-// ── Source filter ─────────────────────────────────────────────────────────────
-function buildSrcFilter() {
-  const sources = [...new Set(allOrders.map(srcName))].sort();
-  const sel = document.getElementById('src-filter');
-  const cur = sel.value;
-  sel.innerHTML = '<option value="">all sources</option>';
-  sources.forEach(s => { const o = document.createElement('option'); o.value = s; o.textContent = s; sel.appendChild(o); });
-  if (sources.includes(cur)) sel.value = cur;
+function buildFilters(){
+  const sources=[...new Set(allOrders.map(srcName))].sort();
+  const ss=document.getElementById('src-filter');const sv=ss.value;
+  ss.innerHTML='<option value="">all sources</option>';
+  sources.forEach(s=>{const o=document.createElement('option');o.value=s;o.textContent=s;ss.appendChild(o)});
+  if(sources.includes(sv))ss.value=sv;
+
+  const statuses=[...new Set(allOrders.map(o=>statusInfo(o).label))].sort();
+  const sf=document.getElementById('status-filter');const sfv=sf.value;
+  sf.innerHTML='<option value="">all statuses</option>';
+  statuses.forEach(s=>{const o=document.createElement('option');o.value=s;o.textContent=s;sf.appendChild(o)});
+  if(statuses.includes(sfv))sf.value=sfv;
 }
 
-// ── Filter + sort ─────────────────────────────────────────────────────────────
-function applyFilters() {
-  const q   = document.getElementById('search-inp').value.toLowerCase();
-  const src = document.getElementById('src-filter').value;
-  filtered = allOrders.filter(o => {
-    if (src && srcName(o) !== src) return false;
-    if (q) {
-      const hay = [(o.OrderSourceOrderID || ''), (o.FirstName || '') + ' ' + (o.LastName || ''), srcName(o), String(o.GrandTotal || '')].join(' ').toLowerCase();
-      if (!hay.includes(q)) return false;
+function applyFilters(){
+  const q=document.getElementById('search-inp').value.toLowerCase();
+  const src=document.getElementById('src-filter').value;
+  const st=document.getElementById('status-filter').value;
+  filtered=allOrders.filter(o=>{
+    if(src&&srcName(o)!==src)return false;
+    if(st&&statusInfo(o).label!==st)return false;
+    if(q){
+      const hay=[(o.OrderSourceOrderID||''),(o.FirstName||'')+' '+(o.LastName||''),srcName(o),String(o.GrandTotal||''),statusInfo(o).label].join(' ').toLowerCase();
+      if(!hay.includes(q))return false;
     }
     return true;
   });
-  doSort(); currentPage = 1; renderTable(); renderSummary();
+  doSort();currentPage=1;renderTable();renderSummary();
 }
 
-function doSort() {
-  filtered.sort((a, b) => {
-    let av, bv;
-    if (sortCol === 'source')     { av = srcName(a);                   bv = srcName(b); }
-    else if (sortCol === 'srcOrderId') { av = a.OrderSourceOrderID || ''; bv = b.OrderSourceOrderID || ''; }
-    else if (sortCol === 'items') { av = (a.Items || []).length;        bv = (b.Items || []).length; }
-    else                          { av = a[sortCol];                    bv = b[sortCol]; }
-    if (av == null) return 1; if (bv == null) return -1;
-    return av < bv ? sortDir : av > bv ? -sortDir : 0;
+function doSort(){
+  filtered.sort((a,b)=>{
+    let av,bv;
+    if(sortCol==='source')     {av=srcName(a);bv=srcName(b)}
+    else if(sortCol==='srcOrderId'){av=a.OrderSourceOrderID||'';bv=b.OrderSourceOrderID||''}
+    else if(sortCol==='status'){av=statusInfo(a).label;bv=statusInfo(b).label}
+    else if(sortCol==='items') {av=(a.Items||[]).length;bv=(b.Items||[]).length}
+    else                       {av=a[sortCol];bv=b[sortCol]}
+    if(av==null)return 1;if(bv==null)return -1;
+    if(av<bv)return sortDir;if(av>bv)return -sortDir;
+    // Secondary: when same order ID, group by status code
+    return (a.StatusCode||0)-(b.StatusCode||0);
   });
 }
 
-// ── Summary ───────────────────────────────────────────────────────────────────
-function renderSummary() {
-  const rev = filtered.reduce((s, o) => s + (o.GrandTotal || 0), 0);
-  const bySrc = {};
-  filtered.forEach(o => { const s = srcName(o); if (!bySrc[s]) bySrc[s] = { n: 0, r: 0 }; bySrc[s].n++; bySrc[s].r += o.GrandTotal || 0; });
-  const el = document.getElementById('summary');
-  let h = `
+function renderSummary(){
+  const rev=filtered.reduce((s,o)=>s+(o.GrandTotal||0),0);
+  const bySrc={};
+  filtered.forEach(o=>{const s=srcName(o);if(!bySrc[s])bySrc[s]={n:0,r:0};bySrc[s].n++;bySrc[s].r+=o.GrandTotal||0});
+  const el=document.getElementById('summary');
+  let h=`
     <div class="metric highlight fade-in">
       <div class="metric-label">Total Orders</div>
       <div class="metric-val">${filtered.length.toLocaleString()}</div>
     </div>
     <div class="metric highlight fade-in" style="animation-delay:0.04s">
       <div class="metric-label">Revenue</div>
-      <div class="metric-val">$${rev.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
+      <div class="metric-val">$${rev.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}</div>
     </div>`;
-  Object.entries(bySrc).sort((a, b) => b[1].n - a[1].n).forEach(([s, d], i) => {
-    h += `<div class="metric fade-in" style="animation-delay:${(i + 2) * 0.04}s">
+  Object.entries(bySrc).sort((a,b)=>b[1].n-a[1].n).forEach(([s,d],i)=>{
+    h+=`<div class="metric fade-in" style="animation-delay:${(i+2)*0.04}s">
       <div class="metric-label">${s}</div>
       <div class="metric-val">${d.n.toLocaleString()}</div>
       <div class="metric-sub">$${Math.round(d.r).toLocaleString()}</div>
     </div>`;
   });
-  el.innerHTML = h;
+  el.innerHTML=h;
 }
 
-// ── Table ─────────────────────────────────────────────────────────────────────
-function renderTable() {
-  const vcols = COLS.filter(c => c.vis);
-  const head = document.getElementById('tbl-head');
-  head.innerHTML = '<tr>' + vcols.map(c => {
-    const sorted = sortCol === c.k;
-    const arrow = sorted ? (sortDir === 1 ? '↑' : '↓') : '↕';
-    return `<th class="${sorted ? 'sorted' : ''}" data-col="${c.k}">${c.label}<span class="sa">${arrow}</span></th>`;
-  }).join('') + '</tr>';
-  head.querySelectorAll('th').forEach(th => {
-    th.addEventListener('click', () => {
-      if (sortCol === th.dataset.col) sortDir *= -1;
-      else { sortCol = th.dataset.col; sortDir = -1; }
-      doSort(); renderTable();
+function renderTable(){
+  const vcols=COLS.filter(c=>c.vis);
+  const head=document.getElementById('tbl-head');
+  head.innerHTML='<tr>'+vcols.map(c=>{
+    const sorted=sortCol===c.k;
+    const arrow=sorted?(sortDir===1?'↑':'↓'):'↕';
+    return `<th class="${sorted?'sorted':''}" data-col="${c.k}">${c.label}<span class="sa">${arrow}</span></th>`;
+  }).join('')+'</tr>';
+  head.querySelectorAll('th').forEach(th=>{
+    th.addEventListener('click',()=>{
+      if(sortCol===th.dataset.col)sortDir*=-1;
+      else{sortCol=th.dataset.col;sortDir=1}
+      doSort();renderTable();
     });
   });
 
-  const start = (currentPage - 1) * PAGE_SIZE;
-  const pageData = filtered.slice(start, start + PAGE_SIZE);
-  const body = document.getElementById('tbl-body');
+  const start=(currentPage-1)*PAGE_SIZE;
+  const pageData=filtered.slice(start,start+PAGE_SIZE);
+  const body=document.getElementById('tbl-body');
 
-  if (!pageData.length) {
-    body.innerHTML = `<tr><td colspan="${vcols.length}" style="text-align:center;padding:40px;color:var(--text3);font-family:var(--mono)">no orders</td></tr>`;
-    renderPagination(); return;
+  if(!pageData.length){
+    body.innerHTML=`<tr><td colspan="${vcols.length}" style="text-align:center;padding:40px;color:var(--text3);font-family:var(--mono)">no orders</td></tr>`;
+    renderPagination();return;
   }
 
-  body.innerHTML = pageData.map(o => {
-    const sn = srcName(o);
-    const bc = BADGE_CLS[sn] || 'b-other';
-    const dt = o.TimeOfOrder ? new Date(o.TimeOfOrder).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '—';
-    const amt = o.GrandTotal != null ? '$' + Number(o.GrandTotal).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '—';
-    const skus = (o.Items || []).map(i => `<span class="sku-pill">${i.ProductID || i.InventoryKey || '—'} ×${i.Qty || 1}</span>`).join('');
+  body.innerHTML=pageData.map((o,i)=>{
+    const prev=i>0?pageData[i-1]:null;
+    const sameId=prev&&prev.OrderSourceOrderID&&o.OrderSourceOrderID&&prev.OrderSourceOrderID===o.OrderSourceOrderID;
+    const isGroupCont=!!sameId;
+    // Add top border when a new group starts (and it's not the very first row)
+    const isNewGroup=!sameId&&i>0;
 
-    return '<tr>' + vcols.map(c => {
-      if (c.k === 'source')      return `<td><span class="badge ${bc}">${sn}</span></td>`;
-      if (c.k === 'srcOrderId')  return `<td style="font-family:var(--mono);font-size:11px;color:var(--text2)">${o.OrderSourceOrderID || ('#' + o.ID) || '—'}</td>`;
-      if (c.k === 'TimeOfOrder') return `<td style="white-space:nowrap;font-family:var(--mono);font-size:11px">${dt}</td>`;
-      if (c.k === 'GrandTotal')  return `<td style="font-family:var(--mono)">${amt}</td>`;
-      if (c.k === 'items')       return `<td><div class="sku-list">${skus || '<span style="color:var(--text3);font-size:10px">—</span>'}</div></td>`;
+    const sn=srcName(o);
+    const bc=BADGE_CLS[sn]||'b-other';
+    const si=statusInfo(o);
+    const dt=o.TimeOfOrder?new Date(o.TimeOfOrder).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}):'—';
+    const amt=o.GrandTotal!=null?'$'+Number(o.GrandTotal).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}):'—';
+    const skus=(o.Items||[]).map(it=>`<span class="sku-pill">${it.ProductID||it.InventoryKey||'—'} ×${it.Qty||1}</span>`).join('');
+    const scUrl=`${SC_BASE}/Orders/Detail/${o.ID}`;
+    const rowCls=[isGroupCont?'group-cont':'group-first',isNewGroup?'group-start-border':''].filter(Boolean).join(' ');
+
+    return `<tr class="${rowCls}">`+vcols.map(c=>{
+      if(c.k==='source')      return `<td><span class="badge ${bc}">${sn}</span></td>`;
+      if(c.k==='srcOrderId')  return isGroupCont
+        ?`<td><span class="order-id-cont">↳ ${o.OrderSourceOrderID||('#'+o.ID)||'—'}</span></td>`
+        :`<td><a class="order-link" href="${scUrl}" target="_blank">${o.OrderSourceOrderID||('#'+o.ID)||'—'}</a></td>`;
+      if(c.k==='status')      return `<td><span class="status-badge ${si.cls}">${si.label}</span></td>`;
+      if(c.k==='TimeOfOrder') return `<td style="white-space:nowrap;font-family:var(--mono);font-size:11px">${dt}</td>`;
+      if(c.k==='GrandTotal')  return `<td style="font-family:var(--mono)">${amt}</td>`;
+      if(c.k==='items')       return `<td><div class="sku-list">${skus||'<span style="color:var(--text3);font-size:10px">—</span>'}</div></td>`;
       return '<td>—</td>';
-    }).join('') + '</tr>';
+    }).join('')+'</tr>';
   }).join('');
 
   renderPagination();
 }
 
-function renderPagination() {
-  const total = filtered.length;
-  const pages = Math.ceil(total / PAGE_SIZE);
-  const pag = document.getElementById('pagination');
-  if (pages <= 1) { pag.innerHTML = ''; return; }
-  const s = (currentPage - 1) * PAGE_SIZE + 1;
-  const e = Math.min(currentPage * PAGE_SIZE, total);
-  pag.innerHTML = `
-    <span>${s.toLocaleString()}–${e.toLocaleString()} of ${total.toLocaleString()} orders</span>
-    <button class="btn btn-sm" id="pp" ${currentPage === 1 ? 'disabled' : ''}>← prev</button>
-    <button class="btn btn-sm" id="np" ${currentPage === pages ? 'disabled' : ''}>next →</button>`;
-  document.getElementById('pp')?.addEventListener('click', () => { currentPage--; renderTable(); });
-  document.getElementById('np')?.addEventListener('click', () => { currentPage++; renderTable(); });
+function renderPagination(){
+  const total=filtered.length;const pages=Math.ceil(total/PAGE_SIZE);
+  const pag=document.getElementById('pagination');
+  if(pages<=1){pag.innerHTML='';return}
+  const s=(currentPage-1)*PAGE_SIZE+1;const e=Math.min(currentPage*PAGE_SIZE,total);
+  pag.innerHTML=`<span>${s.toLocaleString()}–${e.toLocaleString()} of ${total.toLocaleString()} orders</span>
+    <button class="btn btn-sm" id="pp" ${currentPage===1?'disabled':''}>← prev</button>
+    <button class="btn btn-sm" id="np" ${currentPage===pages?'disabled':''}>next →</button>`;
+  document.getElementById('pp')?.addEventListener('click',()=>{currentPage--;renderTable()});
+  document.getElementById('np')?.addEventListener('click',()=>{currentPage++;renderTable()});
 }
 
-// ── Column toggles ────────────────────────────────────────────────────────────
-function buildColToggles() {
-  const wrap = document.getElementById('col-toggles');
-  wrap.innerHTML = COLS.map(c =>
-    `<label class="ctog ${c.vis ? 'active' : ''}" data-col="${c.k}">
-      <input type="checkbox" data-col="${c.k}" ${c.vis ? 'checked' : ''}>${c.label}
+function buildColToggles(){
+  const wrap=document.getElementById('col-toggles');
+  wrap.innerHTML=COLS.map(c=>
+    `<label class="ctog ${c.vis?'active':''}" data-col="${c.k}">
+      <input type="checkbox" data-col="${c.k}" ${c.vis?'checked':''}>${c.label}
     </label>`
   ).join('');
-  wrap.querySelectorAll('input').forEach(inp => {
-    inp.addEventListener('change', () => {
-      const col = COLS.find(c => c.k === inp.dataset.col);
-      if (col) { col.vis = inp.checked; inp.closest('.ctog').classList.toggle('active', inp.checked); renderTable(); }
+  wrap.querySelectorAll('input').forEach(inp=>{
+    inp.addEventListener('change',()=>{
+      const col=COLS.find(c=>c.k===inp.dataset.col);
+      if(col){col.vis=inp.checked;inp.closest('.ctog').classList.toggle('active',inp.checked);renderTable()}
     });
   });
 }
 
-// ── Init ──────────────────────────────────────────────────────────────────────
-document.getElementById('date-from').value = daysAgo(7);
-document.getElementById('date-to').value   = today();
+document.getElementById('date-from').value=daysAgo(7);
+document.getElementById('date-to').value=today();
 buildColToggles();
-show('token-dot');
-
-document.getElementById('load-btn').addEventListener('click', loadOrders);
-document.getElementById('search-inp').addEventListener('input', () => { if (allOrders.length) applyFilters(); });
-document.getElementById('src-filter').addEventListener('change', () => { if (allOrders.length) applyFilters(); });
+document.getElementById('load-btn').addEventListener('click',loadOrders);
+document.getElementById('search-inp').addEventListener('input',()=>{if(allOrders.length)applyFilters()});
+document.getElementById('src-filter').addEventListener('change',()=>{if(allOrders.length)applyFilters()});
+document.getElementById('status-filter').addEventListener('change',()=>{if(allOrders.length)applyFilters()});
 </script>
 </body>
 </html>
