@@ -610,30 +610,6 @@ document.getElementById('lightbox').addEventListener('click',e=>{
 });
 document.addEventListener('keydown',e=>{if(e.key==='Escape')document.getElementById('lightbox').classList.remove('open')});
 
-  body.innerHTML=rows.map(({o,it})=>{
-    const si=statusInfo(o);
-    const scUrl=`${SC_BASE}/Orders/Detail.aspx?id=${o.ID}`;
-    const name=itemName(it);
-    const imgUrl=it.ImageURL||'';
-    const pUrl=imgUrl?`/api/image?url=${encodeURIComponent(imgUrl)}`:'';
-    const imgEl=pUrl
-      ?`<img class="item-thumb" src="${pUrl}" alt="${name}" loading="lazy" onerror="this.style.display='none'" data-name="${name}" data-url="${pUrl}" style="width:28px;height:28px"/>`
-      :`<span class="item-thumb-placeholder" style="width:28px;height:28px;font-size:9px">?</span>`;
-    const remaining=Math.max(0,(it.Qty||0)-(it.QtyPicked||0));
-    const unpicked=itemIsUnpicked(it);
-    return`<tr>
-      <td style="font-family:var(--mono);font-size:11px;color:var(--text2)">${companyName(o)}</td>
-      <td><a class="order-link" href="${scUrl}" target="_blank">${o.OrderSourceOrderID||('#'+o.ID)||'—'}</a></td>
-      <td><span class="status-badge ${si.cls}">${si.label}</span></td>
-      <td><div style="display:flex;align-items:center;gap:8px">${imgEl}<span style="font-size:11px">${name}</span>${unpicked?`<span class="item-unpicked" title="Unpicked"></span>`:''}</div></td>
-      <td style="font-family:var(--mono);text-align:center">${it.Qty||0}</td>
-      <td style="font-family:var(--mono);text-align:center">${it.QtyPicked||0}</td>
-      <td style="font-family:var(--mono);text-align:center;${unpicked?'color:var(--amber);font-weight:500':''}">${remaining||'—'}</td>
-      <td style="font-family:var(--mono);font-size:11px;color:var(--text2)">${it.ShipFromWarehouseName||'—'}</td>
-    </tr>`;
-  }).join('');
-  attachLightbox();
-}
 
 // ── Tabs ──────────────────────────────────────────────────────────────────────
 document.querySelectorAll('.tab').forEach(tab=>{
@@ -643,10 +619,10 @@ document.querySelectorAll('.tab').forEach(tab=>{
     if(activeTab==='orders'){
       show('tab-orders');hide('tab-unpicked');
       renderTable();
-    } else if(activeTab==='unpicked'){
+    } else {
       hide('tab-orders');show('tab-unpicked');
       renderUnpicked();
-
+    }
   });
 });
 
@@ -663,7 +639,7 @@ function buildColToggles(){
 }
 
 // ── Init ──────────────────────────────────────────────────────────────────────
-document.getElementById('date-from').value=daysAgo(7);
+document.getElementById('date-from').value=today();
 document.getElementById('date-to').value=today();
 buildColToggles();
 
