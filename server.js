@@ -134,6 +134,10 @@ app.get('/api/orders/day', async (req, res) => {
       pageNum++;
     }
 
+    // Debug: log actual StatusCode + ShippingStatus combos from real orders
+    const uniqueStatuses = [...new Set(allItems.map(o => `SC:${o.StatusCode} SS:${o.ShippingStatus}`))]
+    console.log(`[${date}] Statuses seen: ${uniqueStatuses.join(', ')}`);
+
     res.json({ date, count: allItems.length, total: totalResults, orders: allItems });
 
   } catch (e) {
