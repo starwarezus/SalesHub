@@ -252,7 +252,7 @@ const STATUS_MAP = {
 let allOrders=[], filtered=[];
 let sortCol='srcOrderId', sortDir=1;
 let currentPage=1;
-const PAGE_SIZE=50;
+const PAGE_SIZE=99999;
 const CACHE='sc_hub_v2_';
 
 const COLS=[
@@ -520,15 +520,8 @@ function renderTable(){
 }
 
 function renderPagination(){
-  const total=filtered.length;const pages=Math.ceil(total/PAGE_SIZE);
   const pag=document.getElementById('pagination');
-  if(pages<=1){pag.innerHTML='';return}
-  const s=(currentPage-1)*PAGE_SIZE+1;const e=Math.min(currentPage*PAGE_SIZE,total);
-  pag.innerHTML=`<span>${s.toLocaleString()}–${e.toLocaleString()} of ${total.toLocaleString()} orders</span>
-    <button class="btn btn-sm" id="pp" ${currentPage===1?'disabled':''}>← prev</button>
-    <button class="btn btn-sm" id="np" ${currentPage===pages?'disabled':''}>next →</button>`;
-  document.getElementById('pp')?.addEventListener('click',()=>{currentPage--;renderTable()});
-  document.getElementById('np')?.addEventListener('click',()=>{currentPage++;renderTable()});
+  pag.innerHTML=`<span style="color:var(--text3);font-family:var(--mono);font-size:11px">${filtered.length.toLocaleString()} orders</span>`;
 }
 
 function buildColToggles(){
