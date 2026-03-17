@@ -180,6 +180,16 @@
   ::-webkit-scrollbar-track { background: transparent; }
   ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
   @keyframes fadeIn { from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none} }
+  #jump-top{
+    position:fixed;bottom:28px;right:28px;
+    width:38px;height:38px;border-radius:50%;
+    background:var(--bg3);border:1px solid var(--border2);
+    color:var(--text2);font-size:16px;cursor:pointer;
+    display:none;align-items:center;justify-content:center;
+    transition:all 0.15s;z-index:100;
+  }
+  #jump-top:hover{background:var(--accent);border-color:var(--accent);color:#fff;}
+  #jump-top.visible{display:flex;}
   .fade-in { animation: fadeIn 0.2s ease forwards; }
   .pulse { display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--green);margin-right:6px;animation:pulse 2s infinite; }
   @keyframes pulse { 0%,100%{opacity:1}50%{opacity:0.3} }
@@ -232,6 +242,7 @@
   </div>
 
   <div class="empty" id="empty-msg" style="display:none">— no orders found for this period —</div>
+  <button id="jump-top" title="Back to top">↑</button>
 </div>
 
 <script>
@@ -542,6 +553,12 @@ function buildColToggles(){
 document.getElementById('date-from').value=daysAgo(7);
 document.getElementById('date-to').value=today();
 buildColToggles();
+window.addEventListener('scroll',()=>{
+  const btn=document.getElementById('jump-top');
+  if(window.scrollY>300)btn.classList.add('visible');
+  else btn.classList.remove('visible');
+});
+document.getElementById('jump-top').addEventListener('click',()=>window.scrollTo({top:0,behavior:'smooth'}));
 document.getElementById('load-btn').addEventListener('click',loadOrders);
 document.getElementById('search-inp').addEventListener('input',()=>{if(allOrders.length)applyFilters()});
 document.getElementById('company-filter').addEventListener('change',()=>{if(allOrders.length)applyFilters()});
