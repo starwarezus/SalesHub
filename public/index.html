@@ -235,15 +235,16 @@
 <script>
 const SC_BASE   = 'https://blny.sellercloud.com';
 const STATUS_MAP = {
-  0:{label:'Shopping Cart',cls:'s-other'},
-  1:{label:'Completed',    cls:'s-completed'},
-  2:{label:'In Process',   cls:'s-inprocess'},
-  3:{label:'Problem Order',cls:'s-problem'},
-  4:{label:'On Hold',      cls:'s-onhold'},
-  5:{label:'Cancelled',    cls:'s-cancelled'},
-  6:{label:'Quote',        cls:'s-other'},
-  7:{label:'Void',         cls:'s-cancelled'},
-  8:{label:'Fully Shipped',cls:'s-shipped'},
+  '-1':{label:'Cancelled',    cls:'s-cancelled'},
+  0:   {label:'Shopping Cart',cls:'s-other'},
+  1:   {label:'In Process',   cls:'s-inprocess'},
+  2:   {label:'In Process',   cls:'s-inprocess'},
+  3:   {label:'Completed',    cls:'s-completed'},
+  4:   {label:'On Hold',      cls:'s-onhold'},
+  5:   {label:'Problem Order',cls:'s-problem'},
+  6:   {label:'Quote',        cls:'s-other'},
+  7:   {label:'Cancelled',    cls:'s-cancelled'},
+  8:   {label:'Void',         cls:'s-cancelled'},
 };
 
 let allOrders=[], filtered=[];
@@ -266,7 +267,28 @@ function daysAgo(n) {const d=new Date();d.setDate(d.getDate()-n);return d.toISOS
 function show(id,d='block'){document.getElementById(id).style.display=d}
 function hide(id)   {document.getElementById(id).style.display='none'}
 
-function statusInfo(o){return STATUS_MAP[o.StatusCode]||{label:'code:'+o.StatusCode,cls:'s-other'}}
+function statusInfo(o){
+  // ShippingStatus: 0=Unknown,1=Unshipped,2=PartiallyShipped,3=FullyShipped
+  // Use ShipDate as ground truth for shipped state
+  const hasShipDate = !!(o.ShipDate && o.ShipDate !== '0001-01-01T00:00:00Z');
+  const ss = o.ShippingStatus;
+  const sc = o.StatusCode;
+  // Cancelled
+  if(sc === -1 || sc === 7) return {label:'Cancelled', cls:'s-cancelled'};
+  // Fully shipped / completed
+  if(ss === 3 || (hasShipDate && sc === 3)) return {label:'Completed', cls:'s-completed'};
+  // Partially shipped
+  if(ss === 2) return {label:'Part. Shipped', cls:'s-shipped'};
+  // In process / unshipped
+  if(sc === 1 || sc === 2) return {label:'In Process', cls:'s-inprocess'};
+  // On hold
+  if(sc === 4) return {label:'On Hold', cls:'s-onhold'};
+  // Problem order
+  if(sc === 5) return {label:'Problem Order', cls:'s-problem'};
+  // Fallback: if has ship date show as shipped
+  if(hasShipDate) return {label:'Shipped', cls:'s-shipped'};
+  return STATUS_MAP[sc] || {label:'code:'+sc, cls:'s-other'};
+}
 function companyName(o){return (o.CompanyName||'').trim()||'—'}
 function isINum(sku){return sku&&/^i\d+$/i.test(sku.trim())}
 function orderHasINum(o){return (o.Items||[]).some(it=>isINum(it.ProductID)||isINum(it.InventoryKey))}
