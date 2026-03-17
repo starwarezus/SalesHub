@@ -266,7 +266,7 @@ function daysAgo(n) {const d=new Date();d.setDate(d.getDate()-n);return d.toISOS
 function show(id,d='block'){document.getElementById(id).style.display=d}
 function hide(id)   {document.getElementById(id).style.display='none'}
 
-function statusInfo(o){return STATUS_MAP[o.StatusCode]||{label:'Unknown',cls:'s-other'}}
+function statusInfo(o){return STATUS_MAP[o.StatusCode]||{label:'code:'+o.StatusCode,cls:'s-other'}}
 function companyName(o){return (o.CompanyName||'').trim()||'—'}
 function isINum(sku){return sku&&/^i\d+$/i.test(sku.trim())}
 function orderHasINum(o){return (o.Items||[]).some(it=>isINum(it.ProductID)||isINum(it.InventoryKey))}
