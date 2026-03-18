@@ -35,7 +35,7 @@ select option{background:var(--bg3)}
 .content{padding:16px 24px 40px}
 .tbl-wrap{border:1px solid var(--border);border-radius:8px;overflow:auto}
 table{width:100%;border-collapse:collapse;font-size:12px}
-thead{background:var(--bg2);position:sticky;top:52px;z-index:1}
+thead{background:var(--bg2)}
 th{padding:9px 14px;text-align:left;font-family:var(--mono);font-size:9px;font-weight:500;color:var(--text3);letter-spacing:0.1em;text-transform:uppercase;border-bottom:1px solid var(--border);white-space:nowrap}
 td{padding:8px 14px;border-bottom:1px solid var(--border);color:var(--text);vertical-align:middle}
 tr:last-child td{border-bottom:none}
@@ -100,7 +100,7 @@ tr:hover td{background:var(--bg2)}
 const SC_BASE = 'https://blny.sellercloud.com';
 const REFRESH_MS = 15 * 60 * 1000;
 let allItems = [], imageMap = {}, nextRefresh = null, countdownTimer = null;
-let inumOnly = false;
+let inumOnly = true;
 
 function isINum(sku){ return /^i\d+$/i.test((sku||'').trim()); }
 
@@ -301,6 +301,9 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape') document.getElement
 document.getElementById('search').addEventListener('input',render);
 document.getElementById('wh-filter').addEventListener('change',render);
 document.getElementById('co-filter').addEventListener('change',render);
+// Set initial state of i# button
+document.getElementById('inum-btn').classList.add('on');
+
 document.getElementById('inum-btn').addEventListener('click',()=>{
   inumOnly=!inumOnly;
   document.getElementById('inum-btn').classList.toggle('on',inumOnly);
