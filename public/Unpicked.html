@@ -130,6 +130,7 @@ async function load() {
     buildFilters();
     render();
     renderSummary(data);
+    document.title = `Unpicked (${data.count}) — Gold Label NY`;
 
     // Schedule next refresh
     nextRefresh = Date.now() + REFRESH_MS;
@@ -152,9 +153,9 @@ function updateCountdown() {
 
 function renderSummary(data) {
   const bar = document.getElementById('summary-bar');
-  const date = new Date().toLocaleDateString('en-US', { weekday:'long', month:'long', day:'numeric', year:'numeric' });
+  const dateRange = data.dateRange ? `${data.dateRange.from.replace(/\//g,'-')} → ${data.dateRange.to.replace(/\//g,'-')}` : 'Last 7 days';
   bar.innerHTML = `
-    <div class="metric"><div class="metric-label">Date</div><div class="metric-val" style="font-size:14px;color:var(--text2)">${date}</div></div>
+    <div class="metric"><div class="metric-label">Date range</div><div class="metric-val" style="font-size:13px;color:var(--text2)">${dateRange}</div></div>
     <div class="metric"><div class="metric-label">Unpicked Items</div><div class="metric-val blue">${data.count}</div></div>
     <div class="metric"><div class="metric-label">Orders Affected</div><div class="metric-val amber">${data.orderCount}</div></div>`;
 }
@@ -215,7 +216,7 @@ function render() {
       <div class="table-wrap">
         <table>
           <thead><tr>
-            <th>Company</th><th>Order ID</th><th>Item</th>
+            <th>Company</th><th>Order ID</th><th>Order Date</th><th>Item</th>
             <th style="text-align:center">Qty</th><th style="text-align:center">Picked</th><th style="text-align:center">Remaining</th>
           </tr></thead>
           <tbody>
@@ -226,9 +227,11 @@ function render() {
                 ? `<img class="item-thumb" src="${proxyUrl}" alt="${it.productName}" loading="lazy" onerror="this.style.display='none'" data-name="${it.productName}" data-url="${proxyUrl}" style="width:32px;height:32px;margin-right:8px;vertical-align:middle"/>`
                 : `<span class="item-ph" style="margin-right:8px;vertical-align:middle">?</span>`;
               const scUrl = `${SC_BASE}/Orders/Detail.aspx?id=${it.orderID}`;
+              const dt = it.orderDate ? new Date(it.orderDate).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : '—';
               return `<tr>
                 <td style="font-family:var(--mono);font-size:11px;color:var(--text2)">${it.companyName}</td>
                 <td><a class="order-link" href="${scUrl}" target="_blank">${it.orderSourceOrderID}</a></td>
+                <td style="font-family:var(--mono);font-size:11px;white-space:nowrap;color:var(--text3)">${dt}</td>
                 <td><div style="display:flex;align-items:center">${imgEl}<span style="font-size:11px">${it.productName}</span></div></td>
                 <td style="font-family:var(--mono);text-align:center">${it.qty}</td>
                 <td style="font-family:var(--mono);text-align:center">${it.qtyPicked}</td>
