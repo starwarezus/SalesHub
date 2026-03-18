@@ -33,19 +33,29 @@ select option{background:var(--bg3)}
 .btn:hover{color:var(--text);border-color:var(--border2)}
 .btn.on{background:var(--accent);border-color:var(--accent);color:#fff}
 .content{padding:16px 24px 40px}
-.tbl-wrap{border:1px solid var(--border);border-radius:8px;overflow:auto}
+.tbl-wrap{border:1px solid var(--border);border-radius:8px;overflow:auto;max-height:calc(100vh - 220px)}
 table{width:100%;border-collapse:collapse;font-size:12px}
-thead{background:var(--bg2)}
-th{padding:9px 14px;text-align:left;font-family:var(--mono);font-size:9px;font-weight:500;color:var(--text3);letter-spacing:0.1em;text-transform:uppercase;border-bottom:1px solid var(--border);white-space:nowrap}
-td{padding:8px 14px;border-bottom:1px solid var(--border);color:var(--text);vertical-align:middle}
+thead{background:var(--bg2);position:sticky;top:0;z-index:2}
+th{padding:9px 14px;text-align:left;font-family:var(--mono);font-size:9px;font-weight:500;color:var(--text3);letter-spacing:0.1em;text-transform:uppercase;border-bottom:1px solid var(--border);white-space:nowrap;cursor:pointer;user-select:none}
+th:hover{color:var(--text2)}
+th.sorted{color:var(--accent)}
+th .sa{margin-left:3px;opacity:0.4;font-size:9px}
+th.sorted .sa{opacity:1}
+.col-co{width:140px;min-width:120px}
+.col-ord{width:160px;min-width:120px}
+.col-dt{width:110px;min-width:90px}
+.col-item{min-width:260px}
+.col-wh{width:160px;min-width:120px}
+.col-num{width:70px;min-width:60px;text-align:center}
+td{padding:6px 14px;border-bottom:1px solid var(--border);color:var(--text);vertical-align:middle}
 tr:last-child td{border-bottom:none}
 tr:hover td{background:var(--bg2)}
 .order-link{color:var(--accent);font-family:var(--mono);font-size:11px;text-decoration:none;border-bottom:1px dashed rgba(79,142,247,0.35)}
 .order-link:hover{color:#7ab3ff}
 .item-cell{display:flex;align-items:center;gap:8px}
-.thumb{width:32px;height:32px;border-radius:4px;object-fit:cover;cursor:pointer;border:1px solid var(--border);background:var(--bg3);flex-shrink:0;transition:border-color 0.15s}
+.thumb{width:96px;height:96px;border-radius:6px;object-fit:cover;cursor:pointer;border:1px solid var(--border);background:var(--bg3);flex-shrink:0;transition:border-color 0.15s}
 .thumb:hover{border-color:var(--accent)}
-.thumb-ph{width:32px;height:32px;border-radius:4px;background:var(--bg3);border:1px solid var(--border);display:inline-flex;align-items:center;justify-content:center;color:var(--text3);font-size:10px;flex-shrink:0;font-family:var(--mono)}
+.thumb-ph{width:96px;height:96px;border-radius:6px;background:var(--bg3);border:1px solid var(--border);display:inline-flex;align-items:center;justify-content:center;color:var(--text3);font-size:12px;flex-shrink:0;font-family:var(--mono)}
 .remaining-val{color:var(--amber);font-family:var(--mono);font-weight:500}
 .empty{padding:60px 24px;text-align:center;font-family:var(--mono);font-size:12px;color:var(--text3)}
 .spinner{display:inline-block;width:14px;height:14px;border:2px solid var(--border2);border-top-color:var(--accent);border-radius:50%;animation:spin 0.8s linear infinite;margin-right:8px;vertical-align:middle}
@@ -101,6 +111,7 @@ const SC_BASE = 'https://blny.sellercloud.com';
 const REFRESH_MS = 15 * 60 * 1000;
 let allItems = [], imageMap = {}, nextRefresh = null, countdownTimer = null;
 let inumOnly = true;
+let sortKey = null, sortDir = 1;
 
 function isINum(sku){ return /^i\d+$/i.test((sku||'').trim()); }
 
@@ -172,6 +183,22 @@ function buildFilters(){
   document.getElementById('filter-bar').style.display='flex';
 }
 
+function getSorted(items){
+  if(!sortKey) return items;
+  return [...items].sort((a,b)=>{
+    let av,bv;
+    if(sortKey==='company'){av=a.companyName;bv=b.companyName}
+    else if(sortKey==='order'){av=a.orderSourceOrderID;bv=b.orderSourceOrderID}
+    else if(sortKey==='date'){av=a.orderDate||'';bv=b.orderDate||''}
+    else if(sortKey==='item'){av=a.productName;bv=b.productName}
+    else if(sortKey==='wh'){av=a.warehouse;bv=b.warehouse}
+    else if(sortKey==='qty'){av=a.qty;bv=b.qty}
+    else if(sortKey==='picked'){av=a.qtyPicked;bv=b.qtyPicked}
+    else if(sortKey==='remaining'){av=a.remaining;bv=b.remaining}
+    else{av='';bv=''}
+    if(av<bv)return -sortDir;if(av>bv)return sortDir;return 0;
+  });
+}
 function getFiltered(){
   const q=document.getElementById('search').value.toLowerCase();
   const wh=document.getElementById('wh-filter').value;
@@ -199,19 +226,31 @@ function render(){
     return;
   }
 
-  // Single flat table — no grouping
   const wrap=document.createElement('div');
   wrap.className='tbl-wrap';
-
   const table=document.createElement('table');
 
-  // Header
+  // Sortable headers
   const thead=document.createElement('thead');
   const hr=document.createElement('tr');
-  ['Company','Order ID','Order Date','Item','Warehouse','Qty','Picked','Remaining'].forEach((h,i)=>{
+  const cols=[
+    {label:'Company',key:'company',cls:'col-co'},
+    {label:'Order ID',key:'order',cls:'col-ord'},
+    {label:'Order Date',key:'date',cls:'col-dt'},
+    {label:'Item',key:'item',cls:'col-item'},
+    {label:'Warehouse',key:'wh',cls:'col-wh'},
+    {label:'Qty',key:'qty',cls:'col-num'},
+    {label:'Picked',key:'picked',cls:'col-num'},
+    {label:'Remaining',key:'remaining',cls:'col-num'},
+  ];
+  cols.forEach(col=>{
     const th=document.createElement('th');
-    th.textContent=h;
-    if(i>=5) th.style.textAlign='center';
+    th.className=col.cls+(sortKey===col.key?' sorted':'');
+    th.innerHTML=col.label+'<span class="sa">'+(sortKey===col.key?(sortDir===1?'↑':'↓'):'↕')+'</span>';
+    th.addEventListener('click',()=>{
+      if(sortKey===col.key)sortDir*=-1;else{sortKey=col.key;sortDir=1;}
+      render();
+    });
     hr.appendChild(th);
   });
   thead.appendChild(hr);
@@ -219,16 +258,17 @@ function render(){
 
   // Body
   const tbody=document.createElement('tbody');
-  items.forEach(it=>{
+  getSorted(items).forEach(it=>{
     const tr=document.createElement('tr');
     const scUrl=SC_BASE+'/Orders/Detail.aspx?id='+it.orderID;
     const dt=it.orderDate?new Date(it.orderDate).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}):'—';
     const imgUrl=imageMap[it.productID]||'';
     const proxyUrl=imgUrl?'/api/image?url='+encodeURIComponent(imgUrl):'';
+    const THUMB=96;
 
     // Company
     const tdCo=document.createElement('td');
-    tdCo.style.cssText='font-family:var(--mono);font-size:11px;color:var(--text2)';
+    tdCo.className='col-co'; tdCo.style.cssText='font-family:var(--mono);font-size:11px;color:var(--text2)';
     tdCo.textContent=it.companyName;
     tr.appendChild(tdCo);
 
@@ -250,7 +290,8 @@ function render(){
       const img=document.createElement('img');
       img.className='thumb'; img.src=proxyUrl; img.alt=it.productName;
       img.loading='lazy'; img.dataset.name=it.productName; img.dataset.url=proxyUrl;
-      const ph=document.createElement('span'); ph.className='thumb-ph'; ph.textContent='?'; ph.style.display='none';
+      const ph=document.createElement('span'); ph.className='thumb-ph'; ph.textContent='?'; ph.style.cssText='display:none;width:'+THUMB+'px;height:'+THUMB+'px';
+      img.style.width=THUMB+'px';img.style.height=THUMB+'px';
       img.onerror=function(){this.style.display='none';ph.style.display='inline-flex';};
       img.addEventListener('click',()=>{
         document.getElementById('lb-img').src=proxyUrl;
@@ -259,7 +300,7 @@ function render(){
       });
       cell.appendChild(img); cell.appendChild(ph);
     } else {
-      const ph=document.createElement('span'); ph.className='thumb-ph'; ph.textContent='?';
+      const ph=document.createElement('span'); ph.className='thumb-ph'; ph.textContent='?'; ph.style.cssText='width:'+THUMB+'px;height:'+THUMB+'px';
       cell.appendChild(ph);
     }
     const nameSpan=document.createElement('span'); nameSpan.style.fontSize='11px'; nameSpan.textContent=it.productName;
