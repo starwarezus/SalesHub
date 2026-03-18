@@ -87,12 +87,16 @@ function isInProcess(o) {
   return true;                             // in process
 }
 
-function getUnpickedItems(orders) {
+function isINum(sku) { return sku && /^i\d+$/i.test(sku.trim()); }
+
+function getUnpickedItems(orders, inumFilterOnly = true) {
   const rows = [];
   orders.forEach(o => {
     if (!isInProcess(o)) return;
     (o.Items || []).forEach(it => {
       if ((it.Qty || 0) > (it.QtyPicked || 0)) {
+        // By default only include i-number SKUs in email/report
+        if (inumFilterOnly && !isINum(it.ProductID) && !isINum(it.InventoryKey)) return;
         rows.push({ order: o, item: it });
       }
     });
@@ -173,7 +177,12 @@ async function buildEmailHtml(rows, generatedAt) {
     await Promise.all(skus.map(async sku => {
       const url = imageCache[sku];
       if (url) {
-        imgMap[sku] = await fetchImageAsBase64(url);
+        const b64 = await fetchImageAsBase64(url);
+        imgMap[sku] = b64;
+        if (b64) console.log(`[EMAIL IMG] ${sku} embedded (${Math.round(b64.length/1024)}kb)`);
+        else console.log(`[EMAIL IMG] ${sku} failed to embed`);
+      } else {
+        console.log(`[EMAIL IMG] ${sku} no URL in cache`);
       }
     }));
   }
@@ -312,7 +321,7 @@ app.get('/api/unpicked/today', async (req, res) => {
     console.log(`[UNPICKED] Fetching ${days} days: ${from} -> ${to}`);
     const orders = await fetchOrdersForRange(from, to);
     console.log(`[UNPICKED] ${orders.length} orders fetched, filtering unpicked in-process...`);
-    const rows = getUnpickedItems(orders);
+    const rows = getUnpickedItems(orders, false); // frontend handles i# filter
     console.log(`[UNPICKED] ${rows.length} unpicked items found`);
     res.json({
       generatedAt: new Date().toISOString(),
