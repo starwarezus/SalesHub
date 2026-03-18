@@ -15,7 +15,7 @@ const SC_PASS      = process.env.SC_PASS      || 'Corishabt1987!!';
 const PORT         = process.env.PORT         || 3000;
 const RESEND_KEY   = process.env.RESEND_KEY   || '';
 const REPORT_EMAIL = process.env.REPORT_EMAIL || 'henry@goldlabelny.com';
-const APP_URL      = process.env.APP_URL      || 'https://your-app.railway.app';
+const APP_URL      = process.env.APP_URL      || 'https://ocrscanner-production.up.railway.app';
 
 // ─── Token store ──────────────────────────────────────────────────────────────
 let tokenStore = { value: null, expiresAt: null, refreshing: false };
