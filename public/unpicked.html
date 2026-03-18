@@ -8,7 +8,8 @@
 <style>
 :root{--bg:#0d0f12;--bg2:#13161b;--bg3:#1a1e25;--bg4:#21262f;--border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.12);--text:#e8eaed;--text2:#8b9099;--text3:#555c66;--accent:#4f8ef7;--green:#3ecf8e;--amber:#f6ad55;--red:#f56565;--mono:'IBM Plex Mono',monospace;--sans:'IBM Plex Sans',sans-serif}
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-html,body{min-height:100%;background:var(--bg);color:var(--text);font-family:var(--sans)}
+html,body{min-height:100%;background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14px}
+
 .topbar{height:52px;background:var(--bg2);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 24px;position:sticky;top:0;z-index:10}
 .topbar-left{display:flex;align-items:center;gap:12px}
 .logo{font-family:var(--mono);font-size:11px;font-weight:500;letter-spacing:0.15em;text-transform:uppercase;color:var(--text2)}
@@ -17,50 +18,62 @@ html,body{min-height:100%;background:var(--bg);color:var(--text);font-family:var
 .page-title{font-family:var(--mono);font-size:11px;color:var(--text3);letter-spacing:0.08em}
 .topbar-right{display:flex;align-items:center;gap:12px}
 .refresh-status{font-family:var(--mono);font-size:10px;color:var(--text3)}
-.refresh-status span{color:var(--green)}
+.refresh-ok{color:var(--green)}
 .countdown{font-family:var(--mono);font-size:10px;color:var(--text3)}
-.summary-bar{padding:16px 24px;display:flex;gap:12px;border-bottom:1px solid var(--border);flex-wrap:wrap}
+
+.summary-bar{padding:16px 24px;display:flex;gap:12px;border-bottom:1px solid var(--border);flex-wrap:wrap;align-items:flex-start}
 .metric{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:10px 16px;min-width:120px}
 .metric-label{font-family:var(--mono);font-size:9px;color:var(--text3);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:4px}
-.metric-val{font-family:var(--mono);font-size:20px;font-weight:500;line-height:1}
-.metric-val.blue{color:var(--accent)}
-.metric-val.amber{color:var(--amber)}
-.metric-updated{font-family:var(--mono);font-size:10px;color:var(--text3);align-self:flex-end;padding-bottom:4px}
+.metric-val{font-family:var(--mono);font-size:20px;font-weight:500;line-height:1;color:var(--text)}
+.blue{color:var(--accent)}
+.amber-c{color:var(--amber)}
+
 .filter-bar{padding:10px 24px;display:flex;gap:8px;align-items:center;border-bottom:1px solid var(--border);background:var(--bg2);flex-wrap:wrap}
-input[type=text]{background:var(--bg3);border:1px solid var(--border2);border-radius:6px;color:var(--text);font-family:var(--mono);font-size:12px;padding:5px 10px;outline:none}
+.filter-label{font-family:var(--mono);font-size:10px;color:var(--text3);letter-spacing:0.06em}
+input[type=text]{background:var(--bg3);border:1px solid var(--border2);border-radius:6px;color:var(--text);font-family:var(--mono);font-size:12px;padding:5px 10px;outline:none;transition:border-color 0.15s}
 input[type=text]:focus{border-color:var(--accent)}
 select{background:var(--bg3);border:1px solid var(--border2);border-radius:6px;color:var(--text);font-family:var(--mono);font-size:12px;padding:5px 10px;outline:none}
 select option{background:var(--bg3)}
-.filter-label{font-family:var(--mono);font-size:10px;color:var(--text3);letter-spacing:0.06em}
-.content{padding:0 24px 40px}
-.warehouse-group{margin-top:20px}
-.warehouse-header{font-family:var(--mono);font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--text3);padding:8px 0 6px;border-bottom:1px solid var(--border);margin-bottom:0;display:flex;align-items:center;gap:8px}
-.warehouse-header .wh-count{color:var(--amber);font-weight:500}
-.table-wrap{border:1px solid var(--border);border-radius:8px;overflow:auto;margin-top:8px}
+.toggle-btn{font-family:var(--mono);font-size:11px;padding:5px 14px;border-radius:6px;border:1px solid var(--border2);background:transparent;color:var(--text3);cursor:pointer;transition:all 0.15s;white-space:nowrap}
+.toggle-btn:hover{color:var(--text);border-color:var(--border2)}
+.toggle-btn.on{background:var(--accent);border-color:var(--accent);color:#fff}
+
+.content{padding:16px 24px 40px}
+.wh-section{margin-bottom:24px}
+.wh-header{font-family:var(--mono);font-size:10px;letter-spacing:0.12em;text-transform:uppercase;color:var(--text3);padding:6px 0;margin-bottom:8px;display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--border)}
+.wh-count{color:var(--amber);font-weight:500}
+
+.tbl-wrap{border:1px solid var(--border);border-radius:8px;overflow:hidden}
 table{width:100%;border-collapse:collapse;font-size:12px}
-thead{background:var(--bg2);position:sticky;top:52px;z-index:1}
+thead{background:var(--bg2)}
 th{padding:9px 14px;text-align:left;font-family:var(--mono);font-size:9px;font-weight:500;color:var(--text3);letter-spacing:0.1em;text-transform:uppercase;border-bottom:1px solid var(--border);white-space:nowrap}
-td{padding:8px 14px;border-bottom:1px solid var(--border);vertical-align:middle}
+th.center{text-align:center}
+td{padding:8px 14px;border-bottom:1px solid var(--border);color:var(--text);vertical-align:middle}
 tr:last-child td{border-bottom:none}
 tr:hover td{background:var(--bg2)}
+
 .order-link{color:var(--accent);font-family:var(--mono);font-size:11px;text-decoration:none;border-bottom:1px dashed rgba(79,142,247,0.35)}
 .order-link:hover{color:#7ab3ff}
-.status-badge{display:inline-block;padding:2px 8px;border-radius:4px;font-family:var(--mono);font-size:9px;font-weight:500;letter-spacing:0.05em;text-transform:uppercase;white-space:nowrap}
-.s-inprocess{background:rgba(246,173,85,0.12);color:#f6ad55;border:1px solid rgba(246,173,85,0.25)}
-.item-thumb{width:32px;height:32px;border-radius:4px;object-fit:cover;cursor:pointer;border:1px solid var(--border);background:var(--bg3);flex-shrink:0;transition:border-color 0.15s}
-.item-thumb:hover{border-color:var(--accent)}
-.item-ph{width:32px;height:32px;border-radius:4px;background:var(--bg3);border:1px solid var(--border);display:inline-flex;align-items:center;justify-content:center;color:var(--text3);font-size:10px;flex-shrink:0}
-.remaining{color:var(--amber);font-weight:500;font-family:var(--mono)}
+.item-cell{display:flex;align-items:center;gap:8px}
+.thumb{width:32px;height:32px;border-radius:4px;object-fit:cover;cursor:pointer;border:1px solid var(--border);background:var(--bg3);flex-shrink:0}
+.thumb:hover{border-color:var(--accent)}
+.thumb-ph{width:32px;height:32px;border-radius:4px;background:var(--bg3);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;color:var(--text3);font-size:10px;flex-shrink:0;font-family:var(--mono)}
+.remaining-val{color:var(--amber);font-family:var(--mono);font-weight:500}
+.mono-td{font-family:var(--mono);font-size:11px}
+.center-td{text-align:center;font-family:var(--mono)}
+
 .empty{padding:60px 24px;text-align:center;font-family:var(--mono);font-size:12px;color:var(--text3)}
-.loading{padding:60px 24px;text-align:center;font-family:var(--mono);font-size:12px;color:var(--text3)}
-.spinner{display:inline-block;width:16px;height:16px;border:2px solid var(--border2);border-top-color:var(--accent);border-radius:50%;animation:spin 0.8s linear infinite;margin-right:8px;vertical-align:middle}
+.loading-msg{padding:60px 24px;text-align:center;font-family:var(--mono);font-size:12px;color:var(--text3)}
+.spinner{display:inline-block;width:14px;height:14px;border:2px solid var(--border2);border-top-color:var(--accent);border-radius:50%;animation:spin 0.8s linear infinite;margin-right:8px;vertical-align:middle}
 @keyframes spin{to{transform:rotate(360deg)}}
-#lightbox{position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:1000;display:none;align-items:center;justify-content:center;flex-direction:column;gap:14px}
+
+#lightbox{position:fixed;inset:0;background:rgba(0,0,0,0.88);z-index:1000;display:none;align-items:center;justify-content:center;flex-direction:column;gap:14px}
 #lightbox.open{display:flex}
-#lightbox img{max-width:80vw;max-height:70vh;border-radius:8px;object-fit:contain;border:1px solid var(--border2)}
-#lightbox-name{font-family:var(--mono);font-size:12px;color:var(--text2);max-width:80vw;text-align:center}
-#lightbox-close{position:absolute;top:20px;right:24px;background:transparent;border:1px solid var(--border2);color:var(--text2);font-size:18px;width:36px;height:36px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center}
-#lightbox-close:hover{background:var(--red);border-color:var(--red);color:#fff}
+#lightbox img{max-width:80vw;max-height:72vh;border-radius:8px;object-fit:contain;border:1px solid var(--border2)}
+#lb-name{font-family:var(--mono);font-size:12px;color:var(--text2);max-width:80vw;text-align:center}
+#lb-close{position:absolute;top:20px;right:24px;background:transparent;border:1px solid var(--border2);color:var(--text2);font-size:18px;width:36px;height:36px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.15s}
+#lb-close:hover{background:var(--red);border-color:var(--red);color:#fff}
+
 ::-webkit-scrollbar{width:6px;height:6px}
 ::-webkit-scrollbar-track{background:transparent}
 ::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
@@ -75,64 +88,66 @@ tr:hover td{background:var(--bg2)}
     <div class="page-title">Unpicked Items — Live</div>
   </div>
   <div class="topbar-right">
-    <div class="refresh-status" id="refresh-status">loading...</div>
+    <div class="refresh-status" id="refresh-status"><span class="spinner"></span>Loading...</div>
     <div class="countdown" id="countdown"></div>
   </div>
 </div>
 
 <div class="summary-bar" id="summary-bar">
-  <div class="loading"><span class="spinner"></span>Fetching today's unpicked items...</div>
+  <div class="loading-msg"><span class="spinner"></span>Fetching unpicked items...</div>
 </div>
 
 <div class="filter-bar" id="filter-bar" style="display:none">
   <span class="filter-label">Filter</span>
-  <input type="text" id="search" placeholder="search items or orders..." style="width:220px"/>
+  <input type="text" id="search" placeholder="search..." style="width:200px"/>
   <select id="wh-filter"><option value="">all warehouses</option></select>
   <select id="co-filter"><option value="">all companies</option></select>
+  <button class="toggle-btn" id="inum-btn">i# only</button>
 </div>
 
 <div class="content" id="content">
-  <div class="loading" id="loading"><span class="spinner"></span>Loading...</div>
+  <div class="loading-msg" id="loading-msg"><span class="spinner"></span>Loading...</div>
 </div>
 
 <div id="lightbox">
-  <button id="lightbox-close">✕</button>
-  <img id="lightbox-img" src="" alt=""/>
-  <div id="lightbox-name"></div>
+  <button id="lb-close">✕</button>
+  <img id="lb-img" src="" alt=""/>
+  <div id="lb-name"></div>
 </div>
 
 <script>
 const SC_BASE = 'https://blny.sellercloud.com';
-const REFRESH_MS = 15 * 60 * 1000; // 15 minutes
+const REFRESH_MS = 15 * 60 * 1000;
 let allItems = [], imageMap = {}, nextRefresh = null, countdownTimer = null;
+let inumOnly = false;
+
+function isINum(sku) { return sku && /^i\d+$/i.test((sku||'').trim()); }
 
 async function load() {
-  document.getElementById('refresh-status').innerHTML = '<span class="spinner" style="display:inline-block;width:10px;height:10px;border:1.5px solid rgba(255,255,255,0.2);border-top-color:var(--accent);border-radius:50%;animation:spin 0.8s linear infinite;margin-right:6px;vertical-align:middle"></span>Fetching...';
+  document.getElementById('refresh-status').innerHTML = '<span class="spinner"></span>Fetching...';
   try {
     const r = await fetch('/api/unpicked/today');
     if (!r.ok) throw new Error('HTTP ' + r.status);
     const data = await r.json();
     allItems = data.items || [];
 
-    // Fetch images for all unique SKUs
     const skus = [...new Set(allItems.map(it => it.productID).filter(Boolean))];
     if (skus.length) {
-      const chunks = [];
-      for (let i = 0; i < skus.length; i += 50) chunks.push(skus.slice(i, i+50));
-      for (const chunk of chunks) {
+      for (let i = 0; i < skus.length; i += 50) {
+        const chunk = skus.slice(i, i + 50);
         const ir = await fetch('/api/images?skus=' + encodeURIComponent(chunk.join(',')));
-        if (ir.ok) { const d = await ir.json(); Object.assign(imageMap, d); }
+        if (ir.ok) Object.assign(imageMap, await ir.json());
       }
     }
 
-    const updated = new Date(data.generatedAt).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', timeZone: 'America/New_York' });
-    document.getElementById('refresh-status').innerHTML = `<span>Updated ${updated} ET</span>`;
+    const updated = new Date(data.generatedAt).toLocaleTimeString('en-US', { hour:'numeric', minute:'2-digit', timeZone:'America/New_York' });
+    document.getElementById('refresh-status').innerHTML = '<span class="refresh-ok">Updated ' + updated + ' ET</span>';
+    document.title = 'Unpicked (' + data.count + ') — Gold Label NY';
+
+    renderSummary(data);
     buildFilters();
     render();
-    renderSummary(data);
-    document.title = `Unpicked (${data.count}) — Gold Label NY`;
 
-    // Schedule next refresh
     nextRefresh = Date.now() + REFRESH_MS;
     if (countdownTimer) clearInterval(countdownTimer);
     countdownTimer = setInterval(updateCountdown, 1000);
@@ -145,19 +160,19 @@ async function load() {
 
 function updateCountdown() {
   if (!nextRefresh) return;
-  const remaining = Math.max(0, nextRefresh - Date.now());
-  const m = Math.floor(remaining / 60000);
-  const s = Math.floor((remaining % 60000) / 1000);
-  document.getElementById('countdown').textContent = `Refreshes in ${m}:${String(s).padStart(2,'0')}`;
+  const rem = Math.max(0, nextRefresh - Date.now());
+  const m = Math.floor(rem / 60000);
+  const s = Math.floor((rem % 60000) / 1000);
+  document.getElementById('countdown').textContent = 'Refreshes in ' + m + ':' + String(s).padStart(2,'0');
 }
 
 function renderSummary(data) {
   const bar = document.getElementById('summary-bar');
-  const dateRange = data.dateRange ? `${data.dateRange.from.replace(/\//g,'-')} → ${data.dateRange.to.replace(/\//g,'-')}` : 'Last 7 days';
-  bar.innerHTML = `
-    <div class="metric"><div class="metric-label">Date range</div><div class="metric-val" style="font-size:13px;color:var(--text2)">${dateRange}</div></div>
-    <div class="metric"><div class="metric-label">Unpicked Items</div><div class="metric-val blue">${data.count}</div></div>
-    <div class="metric"><div class="metric-label">Orders Affected</div><div class="metric-val amber">${data.orderCount}</div></div>`;
+  const dr = data.dateRange ? data.dateRange.from.replace(/\//g,'-') + ' → ' + data.dateRange.to.replace(/\//g,'-') : 'Last 7 days';
+  bar.innerHTML =
+    '<div class="metric"><div class="metric-label">Date range</div><div class="metric-val" style="font-size:13px;color:var(--text2)">' + dr + '</div></div>' +
+    '<div class="metric"><div class="metric-label">Unpicked Items</div><div class="metric-val blue">' + data.count + '</div></div>' +
+    '<div class="metric"><div class="metric-label">Orders Affected</div><div class="metric-val amber-c">' + data.orderCount + '</div></div>';
 }
 
 function buildFilters() {
@@ -185,6 +200,7 @@ function getFiltered() {
   return allItems.filter(it => {
     if (wh && it.warehouse !== wh) return false;
     if (co && it.companyName !== co) return false;
+    if (inumOnly && !isINum(it.productID)) return false;
     if (q) {
       const hay = [it.companyName, it.orderSourceOrderID, it.productName, it.productID, it.warehouse].join(' ').toLowerCase();
       if (!hay.includes(q)) return false;
@@ -196,73 +212,155 @@ function getFiltered() {
 function render() {
   const items = getFiltered();
   const content = document.getElementById('content');
-  document.getElementById('loading').style.display = 'none';
+  document.getElementById('loading-msg').style.display = 'none';
 
   if (!items.length) {
-    content.innerHTML = '<div class="empty">No unpicked in-process items for today</div>';
+    content.innerHTML = '<div class="empty">No unpicked in-process items</div>';
     return;
   }
 
-  // Group by warehouse
-  const byWarehouse = {};
+  // Group by warehouse using DOM building (avoids nested template literal issues)
+  const byWh = {};
   items.forEach(it => {
-    if (!byWarehouse[it.warehouse]) byWarehouse[it.warehouse] = [];
-    byWarehouse[it.warehouse].push(it);
+    if (!byWh[it.warehouse]) byWh[it.warehouse] = [];
+    byWh[it.warehouse].push(it);
   });
 
-  content.innerHTML = Object.entries(byWarehouse).map(([wh, rows]) => `
-    <div class="warehouse-group">
-      <div class="warehouse-header">${wh}<span class="wh-count">${rows.length} items</span></div>
-      <div class="table-wrap">
-        <table>
-          <thead><tr>
-            <th>Company</th><th>Order ID</th><th>Order Date</th><th>Item</th>
-            <th style="text-align:center">Qty</th><th style="text-align:center">Picked</th><th style="text-align:center">Remaining</th>
-          </tr></thead>
-          <tbody>
-            ${rows.map(it => {
-              const imgUrl = imageMap[it.productID] || '';
-              const proxyUrl = imgUrl ? `/api/image?url=${encodeURIComponent(imgUrl)}` : '';
-              const imgEl = proxyUrl
-                ? `<img class="item-thumb" src="${proxyUrl}" alt="${it.productName}" loading="lazy" onerror="this.style.display='none'" data-name="${it.productName}" data-url="${proxyUrl}" style="width:32px;height:32px;margin-right:8px;vertical-align:middle"/>`
-                : `<span class="item-ph" style="margin-right:8px;vertical-align:middle">?</span>`;
-              const scUrl = `${SC_BASE}/Orders/Detail.aspx?id=${it.orderID}`;
-              const dt = it.orderDate ? new Date(it.orderDate).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : '—';
-              return `<tr>
-                <td style="font-family:var(--mono);font-size:11px;color:var(--text2)">${it.companyName}</td>
-                <td><a class="order-link" href="${scUrl}" target="_blank">${it.orderSourceOrderID}</a></td>
-                <td style="font-family:var(--mono);font-size:11px;white-space:nowrap;color:var(--text3)">${dt}</td>
-                <td><div style="display:flex;align-items:center">${imgEl}<span style="font-size:11px">${it.productName}</span></div></td>
-                <td style="font-family:var(--mono);text-align:center">${it.qty}</td>
-                <td style="font-family:var(--mono);text-align:center">${it.qtyPicked}</td>
-                <td style="text-align:center"><span class="remaining">${it.remaining}</span></td>
-              </tr>`;
-            }).join('')}
-          </tbody>
-        </table>
-      </div>
-    </div>`).join('');
+  content.innerHTML = '';
 
-  // Lightbox
-  document.querySelectorAll('.item-thumb').forEach(img => {
-    img.addEventListener('click', () => {
-      document.getElementById('lightbox-img').src = img.dataset.url;
-      document.getElementById('lightbox-name').textContent = img.dataset.name;
-      document.getElementById('lightbox').classList.add('open');
+  Object.entries(byWh).forEach(([wh, rows]) => {
+    const section = document.createElement('div');
+    section.className = 'wh-section';
+
+    const header = document.createElement('div');
+    header.className = 'wh-header';
+    header.textContent = wh + ' ';
+    const countSpan = document.createElement('span');
+    countSpan.className = 'wh-count';
+    countSpan.textContent = rows.length + ' items';
+    header.appendChild(countSpan);
+    section.appendChild(header);
+
+    const wrap = document.createElement('div');
+    wrap.className = 'tbl-wrap';
+
+    const table = document.createElement('table');
+    const thead = document.createElement('thead');
+    thead.innerHTML = '<tr><th>Company</th><th>Order ID</th><th>Order Date</th><th>Item</th><th class="center">Qty</th><th class="center">Picked</th><th class="center">Remaining</th></tr>';
+    table.appendChild(thead);
+
+    const tbody = document.createElement('tbody');
+    rows.forEach(it => {
+      const tr = document.createElement('tr');
+      const imgUrl = imageMap[it.productID] || '';
+      const proxyUrl = imgUrl ? '/api/image?url=' + encodeURIComponent(imgUrl) : '';
+      const dt = it.orderDate ? new Date(it.orderDate).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : '—';
+      const scUrl = SC_BASE + '/Orders/Detail.aspx?id=' + it.orderID;
+      const remaining = it.remaining;
+
+      // Company
+      const tdCo = document.createElement('td');
+      tdCo.className = 'mono-td';
+      tdCo.style.color = 'var(--text2)';
+      tdCo.textContent = it.companyName;
+      tr.appendChild(tdCo);
+
+      // Order ID
+      const tdOrd = document.createElement('td');
+      const a = document.createElement('a');
+      a.className = 'order-link';
+      a.href = scUrl;
+      a.target = '_blank';
+      a.textContent = it.orderSourceOrderID;
+      tdOrd.appendChild(a);
+      tr.appendChild(tdOrd);
+
+      // Date
+      const tdDt = document.createElement('td');
+      tdDt.className = 'mono-td';
+      tdDt.style.color = 'var(--text3)';
+      tdDt.style.whiteSpace = 'nowrap';
+      tdDt.textContent = dt;
+      tr.appendChild(tdDt);
+
+      // Item (image + name)
+      const tdItem = document.createElement('td');
+      const itemCell = document.createElement('div');
+      itemCell.className = 'item-cell';
+      if (proxyUrl) {
+        const img = document.createElement('img');
+        img.className = 'thumb';
+        img.src = proxyUrl;
+        img.alt = it.productName;
+        img.loading = 'lazy';
+        img.dataset.name = it.productName;
+        img.dataset.url = proxyUrl;
+        img.onerror = function(){ this.style.display='none'; ph.style.display='flex'; };
+        const ph = document.createElement('span');
+        ph.className = 'thumb-ph';
+        ph.textContent = '?';
+        ph.style.display = 'none';
+        img.addEventListener('click', () => openLightbox(proxyUrl, it.productName));
+        itemCell.appendChild(img);
+        itemCell.appendChild(ph);
+      } else {
+        const ph = document.createElement('span');
+        ph.className = 'thumb-ph';
+        ph.textContent = '?';
+        itemCell.appendChild(ph);
+      }
+      const nameSpan = document.createElement('span');
+      nameSpan.style.fontSize = '11px';
+      nameSpan.textContent = it.productName;
+      itemCell.appendChild(nameSpan);
+      tdItem.appendChild(itemCell);
+      tr.appendChild(tdItem);
+
+      // Qty, Picked, Remaining
+      ['qty','qtyPicked'].forEach(k => {
+        const td = document.createElement('td');
+        td.className = 'center-td';
+        td.textContent = it[k];
+        tr.appendChild(td);
+      });
+      const tdRem = document.createElement('td');
+      tdRem.className = 'center-td';
+      const remSpan = document.createElement('span');
+      remSpan.className = 'remaining-val';
+      remSpan.textContent = remaining;
+      tdRem.appendChild(remSpan);
+      tr.appendChild(tdRem);
+
+      tbody.appendChild(tr);
     });
+
+    table.appendChild(tbody);
+    wrap.appendChild(table);
+    section.appendChild(wrap);
+    content.appendChild(section);
   });
 }
 
+function openLightbox(url, name) {
+  document.getElementById('lb-img').src = url;
+  document.getElementById('lb-name').textContent = name;
+  document.getElementById('lightbox').classList.add('open');
+}
+
 document.getElementById('lightbox').addEventListener('click', e => {
-  if (e.target === document.getElementById('lightbox') || e.target === document.getElementById('lightbox-close'))
+  if (e.target === document.getElementById('lightbox') || e.target === document.getElementById('lb-close'))
     document.getElementById('lightbox').classList.remove('open');
 });
 document.addEventListener('keydown', e => { if (e.key === 'Escape') document.getElementById('lightbox').classList.remove('open'); });
 document.getElementById('search').addEventListener('input', render);
 document.getElementById('wh-filter').addEventListener('change', render);
 document.getElementById('co-filter').addEventListener('change', render);
+document.getElementById('inum-btn').addEventListener('click', () => {
+  inumOnly = !inumOnly;
+  document.getElementById('inum-btn').classList.toggle('on', inumOnly);
+  render();
+});
 
-// Kick off
 load();
 </script>
 </body>
