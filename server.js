@@ -15,7 +15,7 @@ const SC_PASS      = process.env.SC_PASS      || 'Corishabt1987!!';
 const PORT         = process.env.PORT         || 3000;
 const RESEND_KEY   = process.env.RESEND_KEY   || '';
 const REPORT_EMAIL = process.env.REPORT_EMAIL || 'henry@goldlabelny.com';
-const APP_URL      = process.env.APP_URL      || 'https://ocrscanner-production.up.railway.app';
+const APP_URL      = (process.env.APP_URL || 'https://ocrscanner-production.up.railway.app').replace(/\/+$/, '');
 
 // ─── Token store ──────────────────────────────────────────────────────────────
 let tokenStore = { value: null, expiresAt: null, refreshing: false };
@@ -339,7 +339,7 @@ app.get('/api/image', async (req, res) => {
 });
 
 // Manual email trigger (for testing)
-app.post('/api/send-report', async (req, res) => {
+app.get('/api/send-report', async (req, res) => {
   try {
     const toDate = new Date();
     const fromDate = new Date();
@@ -354,7 +354,7 @@ app.post('/api/send-report', async (req, res) => {
   } catch(e) { res.status(500).json({ error: e.message }); }
 });
 
-// Live unpicked page
+// Live unpicked page — must be before catch-all
 app.get('/unpicked', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'unpicked.html'));
 });
