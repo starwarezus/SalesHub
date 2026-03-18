@@ -151,7 +151,27 @@ async function sendEmail(subject, html) {
   } catch(e) { console.error('[EMAIL] Error:', e.message); }
 }
 
-function buildEmailHtml(rows, generatedAt) {
+async function fetchImageAsBase64(imgUrl) {
+  try {
+    const token = await getToken();
+    const r = await fetch(imgUrl, { headers: { 'Authorization': 'Bearer ' + token } });
+    if (!r.ok) return '';
+    const buf = await r.buffer();
+    const ct = r.headers.get('content-type') || 'image/jpeg';
+    return 'data:' + ct + ';base64,' + buf.toString('base64');
+  } catch(e) { return ''; }
+}
+
+async function buildEmailHtml(rows, generatedAt) {
+  // Pre-fetch images as base64 for email embedding
+  const skus = [...new Set(rows.map(r => r.item.ProductID || r.item.InventoryKey || '').filter(Boolean))];
+  const imgMap = {};
+  if (skus.length) {
+    await Promise.all(skus.map(async sku => {
+      const cached = imageCache[sku];
+      if (cached) { imgMap[sku] = cached ? await fetchImageAsBase64(cached) : ''; }
+    }));
+  }
   const orderIds = new Set(rows.map(r => r.order.OrderSourceOrderID || r.order.ID));
   const byWarehouse = {};
   rows.forEach(r => {
@@ -166,7 +186,9 @@ function buildEmailHtml(rows, generatedAt) {
       <tr>
         <td style="padding:8px 12px;border-bottom:1px solid #2a2f3a;font-family:monospace;font-size:12px;color:#8b9099">${r.order.CompanyName || '—'}</td>
         <td style="padding:8px 12px;border-bottom:1px solid #2a2f3a;font-family:monospace;font-size:12px"><a href="${APP_URL}/unpicked" style="color:#4f8ef7">${r.order.OrderSourceOrderID || r.order.ID}</a></td>
-        <td style="padding:8px 12px;border-bottom:1px solid #2a2f3a;font-size:12px">${r.item.ProductName || r.item.DisplayName || r.item.ProductID || '—'}</td>
+        <td style="padding:8px 12px;border-bottom:1px solid #2a2f3a;font-size:12px">
+          ${imgMap[r.item.ProductID||r.item.InventoryKey||''] ? '<img src="' + imgMap[r.item.ProductID||r.item.InventoryKey||''] + '" style="width:32px;height:32px;border-radius:4px;object-fit:cover;vertical-align:middle;margin-right:8px"/>' : ''}${r.item.ProductName || r.item.DisplayName || r.item.ProductID || '—'}
+        </td>
         <td style="padding:8px 12px;border-bottom:1px solid #2a2f3a;font-family:monospace;font-size:12px;text-align:center">${r.item.Qty || 0}</td>
         <td style="padding:8px 12px;border-bottom:1px solid #2a2f3a;font-family:monospace;font-size:12px;text-align:center">${r.item.QtyPicked || 0}</td>
         <td style="padding:8px 12px;border-bottom:1px solid #2a2f3a;font-family:monospace;font-size:12px;text-align:center;color:#f6ad55;font-weight:600">${(r.item.Qty||0)-(r.item.QtyPicked||0)}</td>
@@ -237,7 +259,7 @@ setInterval(async () => {
     const orders = await fetchOrdersForRange(scDateStr(fromD), scDateStr(toD));
     const rows = getUnpickedItems(orders);
     const timeLabel = new Date().toLocaleString('en-US', { timeZone: 'America/New_York', dateStyle: 'full', timeStyle: 'short' });
-    const html = buildEmailHtml(rows, timeLabel);
+    const html = await buildEmailHtml(rows, timeLabel);
     const subject = `Unpicked Items — ${rows.length} items across ${new Set(rows.map(r => r.order.OrderSourceOrderID||r.order.ID)).size} orders`;
     await sendEmail(subject, html);
   } catch(e) {
@@ -347,7 +369,7 @@ app.get('/api/send-report', async (req, res) => {
     const orders = await fetchOrdersForRange(scDateStr(fromDate), scDateStr(toDate));
     const rows = getUnpickedItems(orders);
     const timeLabel = new Date().toLocaleString('en-US', { timeZone: 'America/New_York', dateStyle: 'full', timeStyle: 'short' });
-    const html = buildEmailHtml(rows, timeLabel);
+    const html = await buildEmailHtml(rows, timeLabel);
     const subject = `[TEST] Unpicked Items — ${rows.length} items`;
     await sendEmail(subject, html);
     res.json({ ok: true, itemCount: rows.length });
