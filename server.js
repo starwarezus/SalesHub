@@ -232,9 +232,9 @@ setInterval(async () => {
   console.log(`[CRON] Sending unpicked report at ${h}:${String(m).padStart(2,'0')} ET`);
 
   try {
-    const today = new Date();
-    const dateStr = scDateStr(today);
-    const orders = await fetchOrdersForRange(dateStr, dateStr);
+    const toD = new Date();
+    const fromD = new Date(); fromD.setDate(fromD.getDate() - 6);
+    const orders = await fetchOrdersForRange(scDateStr(fromD), scDateStr(toD));
     const rows = getUnpickedItems(orders);
     const timeLabel = new Date().toLocaleString('en-US', { timeZone: 'America/New_York', dateStyle: 'full', timeStyle: 'short' });
     const html = buildEmailHtml(rows, timeLabel);
@@ -273,14 +273,23 @@ app.get('/api/orders/day', async (req, res) => {
   }
 });
 
-// Today's unpicked in-process items (for live page + email)
+// Unpicked in-process items for last N days (default 7)
 app.get('/api/unpicked/today', async (req, res) => {
   try {
-    const today = scDateStr(new Date());
-    const orders = await fetchOrdersForRange(today, today);
+    const days = parseInt(req.query.days || '7', 10);
+    const toDate   = new Date();
+    const fromDate = new Date();
+    fromDate.setDate(fromDate.getDate() - (days - 1));
+    const from = scDateStr(fromDate);
+    const to   = scDateStr(toDate);
+    console.log(`[UNPICKED] Fetching ${days} days: ${from} -> ${to}`);
+    const orders = await fetchOrdersForRange(from, to);
+    console.log(`[UNPICKED] ${orders.length} orders fetched, filtering unpicked in-process...`);
     const rows = getUnpickedItems(orders);
+    console.log(`[UNPICKED] ${rows.length} unpicked items found`);
     res.json({
       generatedAt: new Date().toISOString(),
+      dateRange: { from, to },
       count: rows.length,
       orderCount: new Set(rows.map(r => r.order.OrderSourceOrderID || r.order.ID)).size,
       items: rows.map(r => ({
@@ -293,11 +302,11 @@ app.get('/api/unpicked/today', async (req, res) => {
         qtyPicked: r.item.QtyPicked || 0,
         remaining: (r.item.Qty || 0) - (r.item.QtyPicked || 0),
         warehouse: r.item.ShipFromWarehouseName || '—',
-        statusCode: r.order.StatusCode,
-        shippingStatus: r.order.ShippingStatus
+        orderDate: r.order.TimeOfOrder || null
       }))
     });
   } catch(e) {
+    console.error('[UNPICKED] Error:', e.message);
     res.status(500).json({ error: e.message });
   }
 });
@@ -332,8 +341,10 @@ app.get('/api/image', async (req, res) => {
 // Manual email trigger (for testing)
 app.post('/api/send-report', async (req, res) => {
   try {
-    const today = scDateStr(new Date());
-    const orders = await fetchOrdersForRange(today, today);
+    const toDate = new Date();
+    const fromDate = new Date();
+    fromDate.setDate(fromDate.getDate() - 6);
+    const orders = await fetchOrdersForRange(scDateStr(fromDate), scDateStr(toDate));
     const rows = getUnpickedItems(orders);
     const timeLabel = new Date().toLocaleString('en-US', { timeZone: 'America/New_York', dateStyle: 'full', timeStyle: 'short' });
     const html = buildEmailHtml(rows, timeLabel);
