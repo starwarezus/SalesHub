@@ -274,7 +274,7 @@ setInterval(async () => {
     const rows = getUnpickedItems(orders);
     const timeLabel = new Date().toLocaleString('en-US', { timeZone: 'America/New_York', dateStyle: 'full', timeStyle: 'short' });
     const html = await buildEmailHtml(rows, timeLabel);
-    const subject = `Unpicked Items — ${rows.length} items across ${new Set(rows.map(r => r.order.OrderSourceOrderID||r.order.ID)).size} orders`;
+    const subject = 'Unpicked Items';
     await sendEmail(subject, html);
   } catch(e) {
     console.error('[CRON] Report failed:', e.message);
@@ -384,7 +384,7 @@ app.get('/api/send-report', async (req, res) => {
     const rows = getUnpickedItems(orders);
     const timeLabel = new Date().toLocaleString('en-US', { timeZone: 'America/New_York', dateStyle: 'full', timeStyle: 'short' });
     const html = await buildEmailHtml(rows, timeLabel);
-    const subject = `[TEST] Unpicked Items — ${rows.length} items`;
+    const subject = 'Unpicked Items';
     await sendEmail(subject, html);
     res.json({ ok: true, itemCount: rows.length });
   } catch(e) { res.status(500).json({ error: e.message }); }
