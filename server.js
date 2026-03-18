@@ -159,11 +159,14 @@ async function fetchImageAsBase64(imgUrl) {
   try {
     const token = await getToken();
     const r = await fetch(imgUrl, { headers: { 'Authorization': 'Bearer ' + token } });
-    if (!r.ok) return '';
-    const buf = await r.buffer();
+    if (!r.ok) { console.log('[IMG B64] HTTP ' + r.status + ' for ' + imgUrl.slice(0,60)); return ''; }
+    const arrayBuf = await r.arrayBuffer();
+    const buf = Buffer.from(arrayBuf);
     const ct = r.headers.get('content-type') || 'image/jpeg';
-    return 'data:' + ct + ';base64,' + buf.toString('base64');
-  } catch(e) { return ''; }
+    const b64 = 'data:' + ct + ';base64,' + buf.toString('base64');
+    console.log('[IMG B64] OK ' + buf.length + ' bytes, type: ' + ct);
+    return b64;
+  } catch(e) { console.log('[IMG B64] Error: ' + e.message); return ''; }
 }
 
 async function buildEmailHtml(rows, generatedAt) {
@@ -201,7 +204,7 @@ async function buildEmailHtml(rows, generatedAt) {
         <td style="padding:8px 12px;border-bottom:1px solid #2a2f3a;font-family:monospace;font-size:12px;color:#8b9099">${r.order.CompanyName || '—'}</td>
         <td style="padding:8px 12px;border-bottom:1px solid #2a2f3a;font-family:monospace;font-size:12px"><a href="${APP_URL}/unpicked" style="color:#4f8ef7">${r.order.OrderSourceOrderID || r.order.ID}</a></td>
         <td style="padding:8px 12px;border-bottom:1px solid #2a2f3a;font-size:12px">
-          ${imgMap[r.item.ProductID||r.item.InventoryKey||''] ? '<img src="' + imgMap[r.item.ProductID||r.item.InventoryKey||''] + '" style="width:32px;height:32px;border-radius:4px;object-fit:cover;vertical-align:middle;margin-right:8px"/>' : ''}${r.item.ProductName || r.item.DisplayName || r.item.ProductID || '—'}
+          ${(()=>{const sku=r.item.ProductID||r.item.InventoryKey||'';const b64=imgMap[sku];const proxyUrl=b64?b64:(imageCache[sku]?APP_URL+'/api/image?url='+encodeURIComponent(imageCache[sku]):'');return proxyUrl?'<img src="'+proxyUrl+'" width="40" height="40" style="width:40px;height:40px;border-radius:4px;object-fit:cover;vertical-align:middle;margin-right:8px"/>':''})()}${r.item.ProductName || r.item.DisplayName || r.item.ProductID || '—'}
         </td>
         <td style="padding:8px 12px;border-bottom:1px solid #2a2f3a;font-family:monospace;font-size:12px;text-align:center">${r.item.Qty || 0}</td>
         <td style="padding:8px 12px;border-bottom:1px solid #2a2f3a;font-family:monospace;font-size:12px;text-align:center">${r.item.QtyPicked || 0}</td>
