@@ -1,4 +1,5 @@
 const express = require('express');
+let sharp; try { sharp = require('sharp'); } catch(e) { sharp = null; console.log('[WARN] sharp not available, images will not be resized'); }
 const fetch   = require('node-fetch');
 const cors    = require('cors');
 const path    = require('path');
@@ -159,36 +160,32 @@ async function fetchImageAsBase64(imgUrl) {
   try {
     const token = await getToken();
     const r = await fetch(imgUrl, { headers: { 'Authorization': 'Bearer ' + token } });
-    if (!r.ok) { console.log('[IMG B64] HTTP ' + r.status + ' for ' + imgUrl.slice(0,60)); return ''; }
+    if (!r.ok) { console.log('[IMG B64] HTTP ' + r.status); return ''; }
     const arrayBuf = await r.arrayBuffer();
-    const buf = Buffer.from(arrayBuf);
-    const ct = r.headers.get('content-type') || 'image/jpeg';
-    const b64 = 'data:' + ct + ';base64,' + buf.toString('base64');
-    console.log('[IMG B64] OK ' + buf.length + ' bytes, type: ' + ct);
+    let buf = Buffer.from(arrayBuf);
+    // Resize to 60x60 thumbnail using sharp to keep email size small
+    if (sharp) {
+      try {
+        buf = await sharp(buf).resize(60, 60, { fit: 'cover' }).jpeg({ quality: 80 }).toBuffer();
+      } catch(e) { console.log('[IMG B64] sharp resize failed: ' + e.message); }
+    }
+    const b64 = 'data:image/jpeg;base64,' + buf.toString('base64');
+    console.log('[IMG B64] OK ' + Math.round(buf.length/1024) + 'kb after resize');
     return b64;
   } catch(e) { console.log('[IMG B64] Error: ' + e.message); return ''; }
 }
 
 async function buildEmailHtml(rows, generatedAt) {
-  // Pre-fetch images as base64 for email embedding
+  // Pre-fetch image URLs into cache, then use proxy URLs in email
+  // (base64 causes emails to exceed Gmail's size limit)
   const skus = [...new Set(rows.map(r => r.item.ProductID || r.item.InventoryKey || '').filter(Boolean))];
+  if (skus.length) await fetchImageUrls(skus);
+  // imgMap: sku -> public proxy URL through our server
   const imgMap = {};
-  if (skus.length) {
-    // First ensure image URLs are in cache
-    await fetchImageUrls(skus);
-    // Then convert to base64 for email embedding
-    await Promise.all(skus.map(async sku => {
-      const url = imageCache[sku];
-      if (url) {
-        const b64 = await fetchImageAsBase64(url);
-        imgMap[sku] = b64;
-        if (b64) console.log(`[EMAIL IMG] ${sku} embedded (${Math.round(b64.length/1024)}kb)`);
-        else console.log(`[EMAIL IMG] ${sku} failed to embed`);
-      } else {
-        console.log(`[EMAIL IMG] ${sku} no URL in cache`);
-      }
-    }));
-  }
+  skus.forEach(sku => {
+    const cached = imageCache[sku];
+    if (cached) imgMap[sku] = APP_URL + '/api/image?url=' + encodeURIComponent(cached);
+  });
   const orderIds = new Set(rows.map(r => r.order.OrderSourceOrderID || r.order.ID));
   const byWarehouse = {};
   rows.forEach(r => {
@@ -204,7 +201,7 @@ async function buildEmailHtml(rows, generatedAt) {
         <td style="padding:8px 12px;border-bottom:1px solid #2a2f3a;font-family:monospace;font-size:12px;color:#8b9099">${r.order.CompanyName || '—'}</td>
         <td style="padding:8px 12px;border-bottom:1px solid #2a2f3a;font-family:monospace;font-size:12px"><a href="${APP_URL}/unpicked" style="color:#4f8ef7">${r.order.OrderSourceOrderID || r.order.ID}</a></td>
         <td style="padding:8px 12px;border-bottom:1px solid #2a2f3a;font-size:12px">
-          ${(()=>{const sku=r.item.ProductID||r.item.InventoryKey||'';const b64=imgMap[sku];const proxyUrl=b64?b64:(imageCache[sku]?APP_URL+'/api/image?url='+encodeURIComponent(imageCache[sku]):'');return proxyUrl?'<img src="'+proxyUrl+'" width="40" height="40" style="width:40px;height:40px;border-radius:4px;object-fit:cover;vertical-align:middle;margin-right:8px"/>':''})()}${r.item.ProductName || r.item.DisplayName || r.item.ProductID || '—'}
+          ${(()=>{const sku=r.item.ProductID||r.item.InventoryKey||'';const url=imgMap[sku]||'';return url?'<img src="'+url+'" width="48" height="48" style="width:48px;height:48px;border-radius:4px;object-fit:cover;vertical-align:middle;margin-right:10px"/>':''})()}${r.item.ProductName || r.item.DisplayName || r.item.ProductID || '—'}
         </td>
         <td style="padding:8px 12px;border-bottom:1px solid #2a2f3a;font-family:monospace;font-size:12px;text-align:center">${r.item.Qty || 0}</td>
         <td style="padding:8px 12px;border-bottom:1px solid #2a2f3a;font-family:monospace;font-size:12px;text-align:center">${r.item.QtyPicked || 0}</td>
