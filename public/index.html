@@ -52,10 +52,10 @@ select option{background:var(--bg3)}
 .ctog input{display:none}
 
 /* Tabs */
-.tabs{display:flex;gap:4px;align-items:center}
-.tab{font-family:var(--mono);font-size:10px;letter-spacing:0.06em;text-transform:uppercase;padding:5px 14px;cursor:pointer;color:var(--text3);border:1px solid transparent;border-radius:20px;transition:all 0.15s;user-select:none;white-space:nowrap}
-.tab:hover{color:var(--text2);border-color:var(--border2)}
-.tab.active{color:var(--accent);border-color:rgba(79,142,247,0.4);background:rgba(79,142,247,0.08)}
+.tabs{display:flex;gap:6px;align-items:center;background:var(--bg3);padding:4px;border-radius:8px}
+.tab{font-family:var(--mono);font-size:10px;letter-spacing:0.06em;text-transform:uppercase;padding:6px 16px;cursor:pointer;color:var(--text3);border:none;border-radius:6px;transition:all 0.15s;user-select:none;white-space:nowrap;background:transparent}
+.tab:hover{color:var(--text);background:var(--bg4)}
+.tab.active{color:#fff;background:var(--accent);font-weight:500}
 
 /* Summary */
 .summary{padding:16px 24px;display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px;border-bottom:1px solid var(--border)}
@@ -584,8 +584,8 @@ function renderUnpicked(){
     const si=statusInfo(o);
     const scUrl=`${SC_BASE}/Orders/Detail.aspx?id=${o.ID}`;
     const name=itemName(it);
-    const imgUrl=it.ImageURL||'';
-    const pUrl=imgUrl?`/api/image?url=${encodeURIComponent(imgUrl)}`:''
+    const mappedUrl2=imageMap[it.ProductID||it.InventoryKey||'']||'';
+    const pUrl=mappedUrl2?`/api/image?url=${encodeURIComponent(mappedUrl2)}`:``
     const imgEl=pUrl
       ?`<img class="item-thumb" src="${pUrl}" alt="${name}" loading="lazy" onerror="this.style.display='none'" data-name="${name}" data-url="${pUrl}" style="width:28px;height:28px"/>`
       :`<span class="item-thumb-placeholder" style="width:28px;height:28px;font-size:9px">?</span>`;
