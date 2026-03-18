@@ -253,9 +253,9 @@ const STATUS_MAP = {
   8:   {label:'Void',         cls:'s-cancelled'},
 };
 
-let allOrders=[], filtered=[];
+let allOrders=[], filtered=[], imageMap={};
 let sortCol='srcOrderId', sortDir=1;
-const CACHE='sc_hub_v4_';
+const CACHE='sc_hub_v5_';
 let activeTab='orders';
 let activeCompanyFilter='';
 
@@ -327,7 +327,7 @@ async function loadOrders(){
   document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active',t.dataset.tab==='orders'));
   document.getElementById('load-btn').disabled=true;
   document.getElementById('load-btn').textContent='loading...';
-  allOrders=[];
+  allOrders=[];imageMap={};
 
   const rangeKey=`${from}_${to}`;
   const cached=cGet(rangeKey);
@@ -349,6 +349,18 @@ async function loadOrders(){
     }
   }
   addLog('',`✓  done — ${allOrders.length.toLocaleString()} orders loaded`,'info');
+  // Fetch product images for all unique SKUs
+  const allSkus=[...new Set(allOrders.flatMap(o=>(o.Items||[]).map(it=>it.ProductID||it.InventoryKey||'').filter(Boolean)))];
+  if(allSkus.length){
+    try{
+      const chunkSize=50;
+      for(let i=0;i<allSkus.length;i+=chunkSize){
+        const chunk=allSkus.slice(i,i+chunkSize);
+        const r=await fetch('/api/images?skus='+encodeURIComponent(chunk.join(',')));
+        if(r.ok){const data=await r.json();Object.assign(imageMap,data);}
+      }
+    }catch(e){console.warn('Image fetch failed',e)}
+  }
   document.getElementById('load-btn').disabled=false;
   document.getElementById('load-btn').textContent='load orders';
   buildFilters();applyFilters();renderSummary();
@@ -491,7 +503,8 @@ function renderTable(){
       const name=itemName(it);
       const unpicked=itemIsUnpicked(it);
       const imgUrl=it.ImageURL||'';
-      const proxyUrl=imgUrl?`/api/image?url=${encodeURIComponent(imgUrl)}`:''
+      const mappedUrl=imageMap[it.ProductID||it.InventoryKey||'']||'';
+      const proxyUrl=mappedUrl?`/api/image?url=${encodeURIComponent(mappedUrl)}`:'';
       const imgEl=proxyUrl
         ?`<img class="item-thumb" src="${proxyUrl}" alt="${name}" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" data-name="${name}" data-url="${proxyUrl}"/><span class="item-thumb-placeholder" style="display:none">?</span>`
         :`<span class="item-thumb-placeholder">?</span>`;
