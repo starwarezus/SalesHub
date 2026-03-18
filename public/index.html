@@ -543,11 +543,17 @@ function renderTable(){
 }
 
 // ── Unpicked tab ──────────────────────────────────────────────────────────────
+function isInProcess(o){
+  const ss=o.ShippingStatus,sc=o.StatusCode;
+  if(sc===-1||sc===7)return false;
+  if(ss===3)return false;
+  if(sc===3&&o.ShipDate)return false;
+  return true;
+}
 function renderUnpicked(){
-  // Flatten all unpicked items from filtered non-cancelled orders
   const rows=[];
   filtered.forEach(o=>{
-    if(isCancelled(o))return;
+    if(!isInProcess(o))return;
     (o.Items||[]).forEach(it=>{
       if(!itemIsUnpicked(it))return;
       rows.push({o,it});
