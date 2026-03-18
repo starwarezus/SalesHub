@@ -149,6 +149,46 @@ app.get('/api/orders/day', async (req, res) => {
   }
 });
 
+// In-memory image URL cache: SKU -> URL string
+const imageCache = {};
+
+// GET /api/images?skus=i123,i456,i789
+// Fetches default image URL for each SKU from SC ProductImage API
+app.get('/api/images', async (req, res) => {
+  const { skus } = req.query;
+  if (!skus) return res.json({});
+  const skuList = skus.split(',').map(s => s.trim()).filter(Boolean);
+  const result = {};
+  // Return cached ones immediately
+  const toFetch = skuList.filter(sku => {
+    if (imageCache[sku] !== undefined) { result[sku] = imageCache[sku]; return false; }
+    return true;
+  });
+  if (!toFetch.length) return res.json(result);
+  try {
+    const token = await getToken();
+    // Fetch in parallel, max 10 at a time
+    const chunks = [];
+    for (let i = 0; i < toFetch.length; i += 10) chunks.push(toFetch.slice(i, i + 10));
+    for (const chunk of chunks) {
+      await Promise.all(chunk.map(async sku => {
+        try {
+          const url = `https://${SC_SERVER}/rest/api/ProductImage/${encodeURIComponent(sku)}`;
+          const r = await fetch(url, { headers: { 'Authorization': `Bearer ${token}` } });
+          if (!r.ok) { imageCache[sku] = ''; result[sku] = ''; return; }
+          const imgs = await r.json();
+          const def = (imgs || []).find(i => i.IsDefault) || imgs[0];
+          const imgUrl = def ? (def.Url || '') : '';
+          imageCache[sku] = imgUrl;
+          result[sku] = imgUrl;
+          if (imgUrl) console.log(`[IMG] ${sku} -> ${imgUrl.slice(0, 80)}`);
+        } catch(e) { imageCache[sku] = ''; result[sku] = ''; }
+      }));
+    }
+  } catch(e) { console.error('Image fetch error:', e.message); }
+  res.json(result);
+});
+
 // Image proxy — fetches SC images server-side with auth token
 app.get('/api/image', async (req, res) => {
   const { url } = req.query;
