@@ -167,9 +167,14 @@ async function buildEmailHtml(rows, generatedAt) {
   const skus = [...new Set(rows.map(r => r.item.ProductID || r.item.InventoryKey || '').filter(Boolean))];
   const imgMap = {};
   if (skus.length) {
+    // First ensure image URLs are in cache
+    await fetchImageUrls(skus);
+    // Then convert to base64 for email embedding
     await Promise.all(skus.map(async sku => {
-      const cached = imageCache[sku];
-      if (cached) { imgMap[sku] = cached ? await fetchImageAsBase64(cached) : ''; }
+      const url = imageCache[sku];
+      if (url) {
+        imgMap[sku] = await fetchImageAsBase64(url);
+      }
     }));
   }
   const orderIds = new Set(rows.map(r => r.order.OrderSourceOrderID || r.order.ID));
