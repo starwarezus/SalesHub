@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Unpicked Items — Gold Label NY</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+<style>
+:root{--bg:#0d0f12;--bg2:#13161b;--bg3:#1a1e25;--bg4:#21262f;--border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.12);--text:#e8eaed;--text2:#8b9099;--text3:#555c66;--accent:#4f8ef7;--green:#3ecf8e;--amber:#f6ad55;--red:#f56565;--mono:'IBM Plex Mono',monospace;--sans:'IBM Plex Sans',sans-serif}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{min-height:100%;background:var(--bg);color:var(--text);font-family:var(--sans)}
+.topbar{height:52px;background:var(--bg2);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 24px;position:sticky;top:0;z-index:10}
+.topbar-left{display:flex;align-items:center;gap:12px}
+.logo{font-family:var(--mono);font-size:11px;font-weight:500;letter-spacing:0.15em;text-transform:uppercase;color:var(--text2)}
+.logo span{color:var(--accent)}
+.divider{width:1px;height:16px;background:var(--border2)}
+.page-title{font-family:var(--mono);font-size:11px;color:var(--text3);letter-spacing:0.08em}
+.topbar-right{display:flex;align-items:center;gap:12px}
+.refresh-status{font-family:var(--mono);font-size:10px;color:var(--text3)}
+.refresh-status span{color:var(--green)}
+.countdown{font-family:var(--mono);font-size:10px;color:var(--text3)}
+.summary-bar{padding:16px 24px;display:flex;gap:12px;border-bottom:1px solid var(--border);flex-wrap:wrap}
+.metric{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:10px 16px;min-width:120px}
+.metric-label{font-family:var(--mono);font-size:9px;color:var(--text3);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:4px}
+.metric-val{font-family:var(--mono);font-size:20px;font-weight:500;line-height:1}
+.metric-val.blue{color:var(--accent)}
+.metric-val.amber{color:var(--amber)}
+.metric-updated{font-family:var(--mono);font-size:10px;color:var(--text3);align-self:flex-end;padding-bottom:4px}
+.filter-bar{padding:10px 24px;display:flex;gap:8px;align-items:center;border-bottom:1px solid var(--border);background:var(--bg2);flex-wrap:wrap}
+input[type=text]{background:var(--bg3);border:1px solid var(--border2);border-radius:6px;color:var(--text);font-family:var(--mono);font-size:12px;padding:5px 10px;outline:none}
+input[type=text]:focus{border-color:var(--accent)}
+select{background:var(--bg3);border:1px solid var(--border2);border-radius:6px;color:var(--text);font-family:var(--mono);font-size:12px;padding:5px 10px;outline:none}
+select option{background:var(--bg3)}
+.filter-label{font-family:var(--mono);font-size:10px;color:var(--text3);letter-spacing:0.06em}
+.content{padding:0 24px 40px}
+.warehouse-group{margin-top:20px}
+.warehouse-header{font-family:var(--mono);font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--text3);padding:8px 0 6px;border-bottom:1px solid var(--border);margin-bottom:0;display:flex;align-items:center;gap:8px}
+.warehouse-header .wh-count{color:var(--amber);font-weight:500}
+.table-wrap{border:1px solid var(--border);border-radius:8px;overflow:auto;margin-top:8px}
+table{width:100%;border-collapse:collapse;font-size:12px}
+thead{background:var(--bg2);position:sticky;top:52px;z-index:1}
+th{padding:9px 14px;text-align:left;font-family:var(--mono);font-size:9px;font-weight:500;color:var(--text3);letter-spacing:0.1em;text-transform:uppercase;border-bottom:1px solid var(--border);white-space:nowrap}
+td{padding:8px 14px;border-bottom:1px solid var(--border);vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:var(--bg2)}
+.order-link{color:var(--accent);font-family:var(--mono);font-size:11px;text-decoration:none;border-bottom:1px dashed rgba(79,142,247,0.35)}
+.order-link:hover{color:#7ab3ff}
+.status-badge{display:inline-block;padding:2px 8px;border-radius:4px;font-family:var(--mono);font-size:9px;font-weight:500;letter-spacing:0.05em;text-transform:uppercase;white-space:nowrap}
+.s-inprocess{background:rgba(246,173,85,0.12);color:#f6ad55;border:1px solid rgba(246,173,85,0.25)}
+.item-thumb{width:32px;height:32px;border-radius:4px;object-fit:cover;cursor:pointer;border:1px solid var(--border);background:var(--bg3);flex-shrink:0;transition:border-color 0.15s}
+.item-thumb:hover{border-color:var(--accent)}
+.item-ph{width:32px;height:32px;border-radius:4px;background:var(--bg3);border:1px solid var(--border);display:inline-flex;align-items:center;justify-content:center;color:var(--text3);font-size:10px;flex-shrink:0}
+.remaining{color:var(--amber);font-weight:500;font-family:var(--mono)}
+.empty{padding:60px 24px;text-align:center;font-family:var(--mono);font-size:12px;color:var(--text3)}
+.loading{padding:60px 24px;text-align:center;font-family:var(--mono);font-size:12px;color:var(--text3)}
+.spinner{display:inline-block;width:16px;height:16px;border:2px solid var(--border2);border-top-color:var(--accent);border-radius:50%;animation:spin 0.8s linear infinite;margin-right:8px;vertical-align:middle}
+@keyframes spin{to{transform:rotate(360deg)}}
+#lightbox{position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:1000;display:none;align-items:center;justify-content:center;flex-direction:column;gap:14px}
+#lightbox.open{display:flex}
+#lightbox img{max-width:80vw;max-height:70vh;border-radius:8px;object-fit:contain;border:1px solid var(--border2)}
+#lightbox-name{font-family:var(--mono);font-size:12px;color:var(--text2);max-width:80vw;text-align:center}
+#lightbox-close{position:absolute;top:20px;right:24px;background:transparent;border:1px solid var(--border2);color:var(--text2);font-size:18px;width:36px;height:36px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center}
+#lightbox-close:hover{background:var(--red);border-color:var(--red);color:#fff}
+::-webkit-scrollbar{width:6px;height:6px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-left">
+    <div class="logo">Gold Label <span>NY</span></div>
+    <div class="divider"></div>
+    <div class="page-title">Unpicked Items — Live</div>
+  </div>
+  <div class="topbar-right">
+    <div class="refresh-status" id="refresh-status">loading...</div>
+    <div class="countdown" id="countdown"></div>
+  </div>
+</div>
+
+<div class="summary-bar" id="summary-bar">
+  <div class="loading"><span class="spinner"></span>Fetching today's unpicked items...</div>
+</div>
+
+<div class="filter-bar" id="filter-bar" style="display:none">
+  <span class="filter-label">Filter</span>
+  <input type="text" id="search" placeholder="search items or orders..." style="width:220px"/>
+  <select id="wh-filter"><option value="">all warehouses</option></select>
+  <select id="co-filter"><option value="">all companies</option></select>
+</div>
+
+<div class="content" id="content">
+  <div class="loading" id="loading"><span class="spinner"></span>Loading...</div>
+</div>
+
+<div id="lightbox">
+  <button id="lightbox-close">✕</button>
+  <img id="lightbox-img" src="" alt=""/>
+  <div id="lightbox-name"></div>
+</div>
+
+<script>
+const SC_BASE = 'https://blny.sellercloud.com';
+const REFRESH_MS = 15 * 60 * 1000; // 15 minutes
+let allItems = [], imageMap = {}, nextRefresh = null, countdownTimer = null;
+
+async function load() {
+  document.getElementById('refresh-status').innerHTML = '<span class="spinner" style="display:inline-block;width:10px;height:10px;border:1.5px solid rgba(255,255,255,0.2);border-top-color:var(--accent);border-radius:50%;animation:spin 0.8s linear infinite;margin-right:6px;vertical-align:middle"></span>Fetching...';
+  try {
+    const r = await fetch('/api/unpicked/today');
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const data = await r.json();
+    allItems = data.items || [];
+
+    // Fetch images for all unique SKUs
+    const skus = [...new Set(allItems.map(it => it.productID).filter(Boolean))];
+    if (skus.length) {
+      const chunks = [];
+      for (let i = 0; i < skus.length; i += 50) chunks.push(skus.slice(i, i+50));
+      for (const chunk of chunks) {
+        const ir = await fetch('/api/images?skus=' + encodeURIComponent(chunk.join(',')));
+        if (ir.ok) { const d = await ir.json(); Object.assign(imageMap, d); }
+      }
+    }
+
+    const updated = new Date(data.generatedAt).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', timeZone: 'America/New_York' });
+    document.getElementById('refresh-status').innerHTML = `<span>Updated ${updated} ET</span>`;
+    buildFilters();
+    render();
+    renderSummary(data);
+
+    // Schedule next refresh
+    nextRefresh = Date.now() + REFRESH_MS;
+    if (countdownTimer) clearInterval(countdownTimer);
+    countdownTimer = setInterval(updateCountdown, 1000);
+    setTimeout(load, REFRESH_MS);
+  } catch(e) {
+    document.getElementById('refresh-status').textContent = 'Error: ' + e.message;
+    setTimeout(load, 60000);
+  }
+}
+
+function updateCountdown() {
+  if (!nextRefresh) return;
+  const remaining = Math.max(0, nextRefresh - Date.now());
+  const m = Math.floor(remaining / 60000);
+  const s = Math.floor((remaining % 60000) / 1000);
+  document.getElementById('countdown').textContent = `Refreshes in ${m}:${String(s).padStart(2,'0')}`;
+}
+
+function renderSummary(data) {
+  const bar = document.getElementById('summary-bar');
+  const date = new Date().toLocaleDateString('en-US', { weekday:'long', month:'long', day:'numeric', year:'numeric' });
+  bar.innerHTML = `
+    <div class="metric"><div class="metric-label">Date</div><div class="metric-val" style="font-size:14px;color:var(--text2)">${date}</div></div>
+    <div class="metric"><div class="metric-label">Unpicked Items</div><div class="metric-val blue">${data.count}</div></div>
+    <div class="metric"><div class="metric-label">Orders Affected</div><div class="metric-val amber">${data.orderCount}</div></div>`;
+}
+
+function buildFilters() {
+  const warehouses = [...new Set(allItems.map(it => it.warehouse))].sort();
+  const wf = document.getElementById('wh-filter');
+  const wv = wf.value;
+  wf.innerHTML = '<option value="">all warehouses</option>';
+  warehouses.forEach(w => { const o = document.createElement('option'); o.value = w; o.textContent = w; wf.appendChild(o); });
+  if (warehouses.includes(wv)) wf.value = wv;
+
+  const companies = [...new Set(allItems.map(it => it.companyName))].sort();
+  const cf = document.getElementById('co-filter');
+  const cv = cf.value;
+  cf.innerHTML = '<option value="">all companies</option>';
+  companies.forEach(c => { const o = document.createElement('option'); o.value = c; o.textContent = c; cf.appendChild(o); });
+  if (companies.includes(cv)) cf.value = cv;
+
+  document.getElementById('filter-bar').style.display = 'flex';
+}
+
+function getFiltered() {
+  const q = document.getElementById('search').value.toLowerCase();
+  const wh = document.getElementById('wh-filter').value;
+  const co = document.getElementById('co-filter').value;
+  return allItems.filter(it => {
+    if (wh && it.warehouse !== wh) return false;
+    if (co && it.companyName !== co) return false;
+    if (q) {
+      const hay = [it.companyName, it.orderSourceOrderID, it.productName, it.productID, it.warehouse].join(' ').toLowerCase();
+      if (!hay.includes(q)) return false;
+    }
+    return true;
+  });
+}
+
+function render() {
+  const items = getFiltered();
+  const content = document.getElementById('content');
+  document.getElementById('loading').style.display = 'none';
+
+  if (!items.length) {
+    content.innerHTML = '<div class="empty">No unpicked in-process items for today</div>';
+    return;
+  }
+
+  // Group by warehouse
+  const byWarehouse = {};
+  items.forEach(it => {
+    if (!byWarehouse[it.warehouse]) byWarehouse[it.warehouse] = [];
+    byWarehouse[it.warehouse].push(it);
+  });
+
+  content.innerHTML = Object.entries(byWarehouse).map(([wh, rows]) => `
+    <div class="warehouse-group">
+      <div class="warehouse-header">${wh}<span class="wh-count">${rows.length} items</span></div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr>
+            <th>Company</th><th>Order ID</th><th>Item</th>
+            <th style="text-align:center">Qty</th><th style="text-align:center">Picked</th><th style="text-align:center">Remaining</th>
+          </tr></thead>
+          <tbody>
+            ${rows.map(it => {
+              const imgUrl = imageMap[it.productID] || '';
+              const proxyUrl = imgUrl ? `/api/image?url=${encodeURIComponent(imgUrl)}` : '';
+              const imgEl = proxyUrl
+                ? `<img class="item-thumb" src="${proxyUrl}" alt="${it.productName}" loading="lazy" onerror="this.style.display='none'" data-name="${it.productName}" data-url="${proxyUrl}" style="width:32px;height:32px;margin-right:8px;vertical-align:middle"/>`
+                : `<span class="item-ph" style="margin-right:8px;vertical-align:middle">?</span>`;
+              const scUrl = `${SC_BASE}/Orders/Detail.aspx?id=${it.orderID}`;
+              return `<tr>
+                <td style="font-family:var(--mono);font-size:11px;color:var(--text2)">${it.companyName}</td>
+                <td><a class="order-link" href="${scUrl}" target="_blank">${it.orderSourceOrderID}</a></td>
+                <td><div style="display:flex;align-items:center">${imgEl}<span style="font-size:11px">${it.productName}</span></div></td>
+                <td style="font-family:var(--mono);text-align:center">${it.qty}</td>
+                <td style="font-family:var(--mono);text-align:center">${it.qtyPicked}</td>
+                <td style="text-align:center"><span class="remaining">${it.remaining}</span></td>
+              </tr>`;
+            }).join('')}
+          </tbody>
+        </table>
+      </div>
+    </div>`).join('');
+
+  // Lightbox
+  document.querySelectorAll('.item-thumb').forEach(img => {
+    img.addEventListener('click', () => {
+      document.getElementById('lightbox-img').src = img.dataset.url;
+      document.getElementById('lightbox-name').textContent = img.dataset.name;
+      document.getElementById('lightbox').classList.add('open');
+    });
+  });
+}
+
+document.getElementById('lightbox').addEventListener('click', e => {
+  if (e.target === document.getElementById('lightbox') || e.target === document.getElementById('lightbox-close'))
+    document.getElementById('lightbox').classList.remove('open');
+});
+document.addEventListener('keydown', e => { if (e.key === 'Escape') document.getElementById('lightbox').classList.remove('open'); });
+document.getElementById('search').addEventListener('input', render);
+document.getElementById('wh-filter').addEventListener('change', render);
+document.getElementById('co-filter').addEventListener('change', render);
+
+// Kick off
+load();
+</script>
+</body>
+</html>
