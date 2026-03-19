@@ -252,26 +252,38 @@ async function buildEmailHtml(rows, generatedAt) {
 // Runs every minute, fires at 9:30 AM and 4:00 PM Eastern
 function getEasternHourMinute() {
   const now = new Date();
-  const eastern = new Date(now.toLocaleString('en-US', { timeZone: 'America/New_York' }));
-  return { h: eastern.getHours(), m: eastern.getMinutes() };
+  // Use Intl.DateTimeFormat for reliable timezone conversion
+  const parts = new Intl.DateTimeFormat('en-US', {
+    timeZone: 'America/New_York',
+    hour: 'numeric', minute: 'numeric', hour12: false
+  }).formatToParts(now);
+  const h = parseInt(parts.find(p => p.type === 'hour').value, 10);
+  const m = parseInt(parts.find(p => p.type === 'minute').value, 10);
+  return { h, m };
 }
 
-let lastEmailSent = { h: -1, m: -1 };
+// Log current ET time on startup so we can verify timezone is working
+const startupET = getEasternHourMinute();
+console.log(`[CRON] Server started. Current ET time: ${startupET.h}:${String(startupET.m).padStart(2,'0')} — scheduled sends at 09:30 and 16:00 ET`);
+
+let lastEmailSent = '';
 
 setInterval(async () => {
   const { h, m } = getEasternHourMinute();
   const isScheduledTime = (h === 9 && m === 30) || (h === 16 && m === 0);
-  const alreadySent = lastEmailSent.h === h && lastEmailSent.m === m;
-  if (!isScheduledTime || alreadySent) return;
+  // Use a string key so it resets each day automatically
+  const key = `${new Date().toISOString().slice(0,10)}-${h}-${m}`;
+  if (!isScheduledTime || lastEmailSent === key) return;
 
-  lastEmailSent = { h, m };
-  console.log(`[CRON] Sending unpicked report at ${h}:${String(m).padStart(2,'0')} ET`);
+  lastEmailSent = key;
+  console.log(`[CRON] Firing at ${h}:${String(m).padStart(2,'0')} ET — fetching unpicked orders...`);
 
   try {
     const toD = new Date();
     const fromD = new Date(); fromD.setDate(fromD.getDate() - 6);
     const orders = await fetchOrdersForRange(scDateStr(fromD), scDateStr(toD));
     const rows = getUnpickedItems(orders);
+    console.log(`[CRON] ${rows.length} unpicked i# items found — building email...`);
     const timeLabel = new Date().toLocaleString('en-US', { timeZone: 'America/New_York', dateStyle: 'full', timeStyle: 'short' });
     const html = await buildEmailHtml(rows, timeLabel);
     const subject = 'Unpicked Items';
